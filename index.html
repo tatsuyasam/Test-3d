@@ -4,15 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>
-    Test 3D Website    
+    PORTFOLIO - SAM    
   </title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  <header class="site-header">
-
-  </header>
+    <header>
+        <button class="header-button active" id="portfolio-button">SAM'S PORTFOLIO</button>
+        <button class="header-button" id="about-me-button">ABOUT ME</button>
+        <button class="header-button" id="contact-button">CONTACT</button>
+        <img src="header-icon.png" alt="Icon" class="header-icon" id="header-icon">
+    </header>
 
 <!-- Main content of the website -->
 
@@ -67,11 +70,13 @@
     </div>
   </main>
 
-<!-- Footer -->
+  
+  <div class="contact-options" id="contact-options" style="display: none;">
+    <button type="button" class="contact-button">Email</button>
+    <button type="button" class="contact-button">LinkedIn</button>
+    <button type="button" class="contact-button">Phone</button>
+  </div>
 
-  <footer class="site-footer">
-
-  </footer>
 
   <script src="script.js"></script>
 </body>

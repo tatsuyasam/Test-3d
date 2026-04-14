@@ -1,5 +1,7 @@
 const vinylCollection = document.querySelector('.vinyl-collection');
 const vinylContainers = Array.from(document.querySelectorAll('.vinyl-container'));
+const vinylCovers = Array.from(document.querySelectorAll('.vinyl-cover'));
+const vinyls = Array.from(document.querySelectorAll('.vinyl'));
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 const itemSpacingX = 320;
@@ -28,3 +30,49 @@ window.addEventListener('wheel', (event) => {
   activeIndex = clamp(activeIndex + direction, 0, vinylContainers.length - 1);
   updateCollectionTransform();
 }, { passive: false });
+
+const aboutMeButton = document.getElementById('about-me-button');
+const portfolioButton = document.getElementById('portfolio-button');
+const contactButton = document.getElementById('contact-button')
+const headerIcon = document.getElementById('header-icon');
+const textBox = document.getElementById('text-box');
+const aboutMeText = document.getElementById('about-me-text');
+const contactOptions = document.getElementById('contact-options');
+
+// Set the "SAM'S PORTFOLIO" button as initially active
+portfolioButton.classList.add('active')
+
+
+const resetView = () => {
+    if (textBox) textBox.style.display = 'none';
+    if (aboutMeText) aboutMeText.style.display = 'none';
+    if (contactOptions) contactOptions.style.display = 'none';
+    if (headerIcon) headerIcon.classList.remove('animate');
+};
+const clearActiveButtons = () => {
+    aboutMeButton.classList.remove('active');
+    portfolioButton.classList.remove('active');
+    contactButton.classList.remove('active');
+};
+aboutMeButton.addEventListener('click', () => {
+    clearActiveButtons();
+    aboutMeButton.classList.add('active');
+    if (headerIcon) headerIcon.classList.add('animate');
+    document.body.classList.add('dark-grey-background');
+    if (textBox) textBox.style.display = 'block';
+    if (aboutMeText) aboutMeText.style.display = 'block';
+    if (contactOptions) contactOptions.style.display = 'none';
+});
+portfolioButton.addEventListener('click', () => {
+    clearActiveButtons();
+    portfolioButton.classList.add('active');
+    document.body.classList.remove('dark-grey-background');
+    resetView();
+});
+contactButton.addEventListener('click', () => {
+    clearActiveButtons();
+    contactButton.classList.add('active');
+    document.body.classList.add('dark-grey-background');
+    resetView();
+    if (contactOptions) contactOptions.style.display = 'flex';
+});

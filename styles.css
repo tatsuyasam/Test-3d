@@ -46,7 +46,7 @@ body.dark-grey-background {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.8; /* Set the desired opacity */
+    opacity: 0.9; /* Set the desired opacity */
     transform: skewY(5deg); /* Skew the cover to create a 3D effect */
 }
 
@@ -67,7 +67,7 @@ body.dark-grey-background {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    z-index: 1; /* Ensure the vinyl is below the cover */
+    z-index: -1; /* Push the vinyl behind its cover */
     transform: skewY(5deg); /* Skew the cover to create a 3D effect */
 }
 
@@ -79,9 +79,9 @@ body.dark-grey-background {
     transform: translate(-50%, -50%);
     width: 70px; /* Adjust the size of the hole */
     height: 70px; /* Adjust the size of the hole */
-    background-color: #000; /* Background color for the hole */
+    background-color: #000;  /* Background color for the hole */
     border-radius: 50%; /* Ensure the hole is fully circular */
-    z-index: 2; /* Ensure the hole is above the vinyl */
+    z-index: 1; /* Ensure the hole stays above the vinyl */
     pointer-events: none;
 }
 
@@ -91,6 +91,7 @@ body.dark-grey-background {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    opacity: 0.9;
     border-radius: 16px;
 }
 
@@ -99,22 +100,13 @@ body.dark-grey-background {
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
+    object-fit: contain;
+    object-position: center;
 }
 
 
 .vinyl.hidden, .vinyl-cover.hidden, .vinyl-container.hidden {
     display: none; /* Hide elements */
-}
-
-.vinyl::before {
-    content: '';
-    width: 70px; /* Adjust the size of the hole */
-    height: 70px; /* Adjust the size of the hole */
-    background-color: #000; /* Background color for the hole */
-    border-radius: 50%; /* Ensure the hole is fully circular */
-    z-index: 2; /* Ensure the hole is above the vinyl */
 }
 
 /* Hover effect to slide the vinyl to the left */

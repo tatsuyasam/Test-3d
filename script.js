@@ -10,6 +10,7 @@ const setContainerPositions = () => {
   vinylContainers.forEach((container, index) => {
     container.style.left = `${-index * itemSpacingX}px`;
     container.style.top = `${index * itemSpacingY}px`;
+    container.style.zIndex = `${index + 1}`; // stack later containers in front
   });
 };
 

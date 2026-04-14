@@ -131,8 +131,8 @@ body.dark-grey-background::before {
     position: absolute;
     top: 0;
     left: 3%; /* Start the vinyl off-screen to the left */
-    width: 280px; /* Adjust the size of the vinyls */
-    height: 280px; /* Adjust the size of the vinyls */
+    width: 320px; /* Adjust the size of the vinyls */
+    height: 320px; /* Adjust the size of the vinyls */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

@@ -76,3 +76,61 @@ contactButton.addEventListener('click', () => {
     resetView();
     if (contactOptions) contactOptions.style.display = 'flex';
 });
+
+let isNavigating = false;
+
+vinyls.forEach((vinyl) => {
+  vinyl.addEventListener('click', () => {
+    if (isNavigating) return;
+    const targetUrl = vinyl.dataset.projectUrl || 'project.html';
+    isNavigating = true;
+    document.body.classList.add('transitioning');
+
+    const rect = vinyl.getBoundingClientRect();
+    const image = vinyl.querySelector('.vinyl-image');
+    const clone = document.createElement('div');
+    clone.classList.add('vinyl-animate', 'fly-right');
+    const squareSize = Math.max(rect.width, rect.height);
+    clone.style.setProperty('--vinyl-width', `${squareSize}px`);
+    clone.style.setProperty('--vinyl-height', `${squareSize}px`);
+
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const currentCenterX = rect.left + rect.width / 2;
+    const currentCenterY = rect.top + rect.height / 2;
+    const translateX = centerX - currentCenterX;
+    const translateY = centerY - currentCenterY;
+
+    clone.style.setProperty('--vinyl-translate-x', `${translateX}px`);
+    clone.style.setProperty('--vinyl-translate-y', `${translateY}px`);
+
+    const offsetX = (squareSize - rect.width) / 2;
+    const offsetY = (squareSize - rect.height) / 2;
+    clone.style.top = `${rect.top - offsetY}px`;
+    clone.style.left = `${rect.left - offsetX}px`;
+    clone.style.width = `${squareSize}px`;
+    clone.style.height = `${squareSize}px`;
+    clone.style.transform = 'none';
+    clone.style.overflow = 'hidden';
+    clone.style.borderRadius = '50%';
+
+    if (image) {
+      const img = document.createElement('img');
+      img.src = image.src;
+      img.alt = image.alt || 'Vinyl record';
+      img.className = 'vinyl-image';
+      clone.appendChild(img);
+    }
+
+    document.body.appendChild(clone);
+
+    vinyl.style.visibility = 'hidden';
+
+    clone.addEventListener('animationend', () => {
+      clone.classList.add('spin-slow');
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 1200);
+    }, { once: true });
+  });
+});

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vinyl Project Showcase</title>
+  <link rel="stylesheet" href="styles.css" />
+
+
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      min-height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    .project-shell {
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .project-shell h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .project-shell p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #ddd;
+    }
+    .project-shell a {
+      color: #fff;
+      border: 1px solid #fff;
+      padding: 10px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 24px;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    .project-shell a:hover {
+      background-color: #fff;
+      color: #000;
+    }
+    .project-vinyl-frame {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 418.5px;
+      height: 418.5px;
+      transform: translate(-50%, -50%);
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+      border-radius: 50%;
+    }
+    .project-vinyl {
+      width: 100%;
+      height: 100%;
+      transform: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: projectVinylSpin 5s linear infinite;
+    }
+    .project-vinyl img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    .project-vinyl-frame::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 70px;
+      height: 70px;
+      background-color: #000;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    @keyframes projectVinylSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="project-shell">
+    <h1>Vinyl Project Showcase</h1>
+    <p>
+      This is the new project page for the vinyl experience. Here you can showcase the full vinyl design, animation details, and the completed creative layout.
+    </p>
+    <p>
+      Use this page to present the selected vinyl project, include images, animations, and project information.
+    </p>
+    <a href="index.html">Go back to the vinyl gallery</a>
+  </div>
+  <div class="project-vinyl-frame">
+    <div class="project-vinyl">
+      <img src="vinyl 1.png" alt="Vinyl record" />
+    </div>
+  </div>
+</body>
+</html>

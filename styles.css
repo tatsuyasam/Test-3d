@@ -3,8 +3,14 @@
     box-sizing: border-box;
 }
 
+html,
 body {
     margin: 0;
+    min-height: 100%;
+    background-color: #000;
+}
+
+body {
     overflow-x: hidden;
     overflow-y: auto;
     background-color: #000;
@@ -54,13 +60,16 @@ header {
 
 .header-icon {
     margin-left: auto; /* Push the icon to the right */
-    width: 100px; /* Increase the width of the icon */
-    height: 100px; /* Increase the height of the icon */
+    width: 100px;
+    height: 100px;
     cursor: pointer; /* Change cursor to pointer on hover */
-    padding-right: 20px;
-    padding-top: 5px;
+    padding: 8px;
     align-self: flex-start; /* Align icon to the top edge */
-    transition: width 0.5s, height 0.5s; /* Smooth transition for size change */
+    transition: width 0.5s, height 0.5s, border-color 0.3s ease;
+    border: 2px solid #a8a8a8;
+    background-color:  rgba(0, 0, 0, 0.486);
+    border-radius: 10px;
+    object-fit: cover;
 }
 
 .header-icon.animate {
@@ -71,22 +80,31 @@ header {
 
 body.dark-grey-background {
     position: relative;
-    background: rgba(0, 0, 0, 0.45);
+    background-color: rgba(0, 0, 0, 0.85);
     color: #fff;
     transition: background 0.5s ease;
 }
 
-body.dark-grey-background::before {
+body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.1);
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    background: transparent;
+    box-shadow: inset 0 0 0 0 rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+    opacity: 0;
     pointer-events: none;
     z-index: 5;
-    transition: backdrop-filter 0.4s ease, background 0.4s ease;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease, background 0.4s ease;
+}
+
+body.dark-grey-background::before {
+    background: rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    opacity: 1;
 }
 
 .vinyl-collection {
@@ -131,8 +149,8 @@ body.dark-grey-background::before {
     position: absolute;
     top: 0;
     left: 3%; /* Start the vinyl off-screen to the left */
-    width: 320px; /* Adjust the size of the vinyls */
-    height: 320px; /* Adjust the size of the vinyls */
+    width: 310px; /* Adjust the size of the vinyls */
+    height: 310px; /* Adjust the size of the vinyls */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -195,20 +213,6 @@ body.dark-grey-background::before {
     transform: rotate(0deg); /* No rotation on hover */
 }
 
-.text-box {
-    position: absolute;
-    top: 90px;
-    left: 10px;
-    right: 10px;
-    max-width: 560px;
-    padding: 18px;
-    background: rgba(20, 20, 20, 0.9);
-    border-radius: 14px;
-    color: #fff;
-    text-align: left;
-    display: none;
-    z-index: 10;
-}
 
 @media (max-width: 900px) {
     .header-button {
@@ -218,9 +222,10 @@ body.dark-grey-background::before {
     }
 
     .header-icon {
-        width: 40px;
-        height: 40px;
-        padding-right: 0;
+        width: 100%;
+        height: 100%;
+        padding: 12px 12px;
+        background-color: #fff;
     }
 
     .vinyl-collection {
@@ -317,6 +322,22 @@ body.dark-grey-background::before {
     }
 }
 
+.text-box {
+    position: absolute;
+    top: 90px;
+    left: 10px;
+    right: 10px;
+    max-width: 560px;
+    padding: 12px;
+    background: rgba(20, 20, 20, 0.9);
+    border-radius: 14px;
+    color: #fff;
+    text-align: left;
+    display: none;
+    font-size: 12px;
+    z-index: 10;
+}
+
 .about-me-text {
     padding-left: 10px;
     position: absolute;
@@ -333,9 +354,12 @@ body.dark-grey-background::before {
 
 .contact-options {
     position: absolute;
-    top: 260px;
-    left: 10px;
+    top: 400px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 20px;
     display: flex;
+    justify-content: center;
     gap: 12px;
     z-index: 10;
     transition: 50ms;
@@ -345,8 +369,8 @@ body.dark-grey-background::before {
     background-color: #272727;
     color: #fff;
     border: 1px solid #a8a8a8;
-    padding: 12px 20px;
-    border-radius: 5px;
+    padding: 16px 100px;
+    border-radius: 25px;
     font-size: 12px;
     cursor: pointer;
 }

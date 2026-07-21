@@ -16,8 +16,8 @@ const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Calculate responsive spacing based on viewport size and aspect ratio
-let itemSpacingX = 290;
-let itemSpacingY = 140;
+let itemSpacingX = 320;
+let itemSpacingY = 170;
 
 const calculateResponsiveSpacing = () => {
   const viewportWidth = window.innerWidth;
@@ -26,19 +26,19 @@ const calculateResponsiveSpacing = () => {
   
   // On portrait phones and small devices, use exact 45-degree spacing
   if (viewportWidth < 700 && aspectRatio <= 1.05) {
-    const spacing = Math.max(viewportWidth * 0.27, 70);
+    const spacing = Math.max(viewportWidth * 0.31, 90);
     itemSpacingX = spacing;
     itemSpacingY = spacing;
   }
   // On tablets / larger devices, use medium spacing
   else if (viewportWidth < 900) {
-    itemSpacingX = 220;
-    itemSpacingY = 110;
+    itemSpacingX = 250;
+    itemSpacingY = 125;
   }
   // On desktop (>= 900px), use default spacing
   else {
-    itemSpacingX = 290;
-    itemSpacingY = 140;
+    itemSpacingX = 320;
+    itemSpacingY = 170;
   }
 };
 
@@ -589,6 +589,12 @@ let galleryDragOriginScrollTop = 0;
 let galleryPointerActive = false;
 
 if (galleryTrack) {
+  const finishGalleryDrag = () => {
+    galleryTrack.classList.remove('dragging');
+    galleryPointerActive = false;
+    isDraggingGallery = false;
+  };
+
   galleryTrack.addEventListener('pointerdown', (event) => {
     if (event.button !== 0) return;
     galleryPointerActive = true;
@@ -599,6 +605,7 @@ if (galleryTrack) {
     galleryDragOriginScrollTop = galleryTrack.scrollTop;
     galleryTrack.classList.add('dragging');
     galleryTrack.setPointerCapture(event.pointerId);
+    event.preventDefault();
   });
 
   galleryTrack.addEventListener('pointermove', (event) => {
@@ -606,7 +613,7 @@ if (galleryTrack) {
     const deltaX = event.clientX - galleryDragStartX;
     const deltaY = event.clientY - galleryDragStartY;
 
-    if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
       isDraggingGallery = true;
     }
 
@@ -616,23 +623,21 @@ if (galleryTrack) {
   });
 
   galleryTrack.addEventListener('pointerup', (event) => {
-    galleryTrack.classList.remove('dragging');
-    galleryPointerActive = false;
+    const wasDragging = isDraggingGallery;
+    finishGalleryDrag();
     galleryTrack.releasePointerCapture(event.pointerId);
-    if (!isDraggingGallery) {
+
+    if (!wasDragging) {
       const targetItem = event.target.closest('.gallery-item');
       if (targetItem) {
         const targetUrl = targetItem.dataset.projectUrl || 'project.html';
         window.location.href = targetUrl;
       }
     }
-    isDraggingGallery = false;
   });
 
   galleryTrack.addEventListener('pointercancel', () => {
-    galleryTrack.classList.remove('dragging');
-    galleryPointerActive = false;
-    isDraggingGallery = false;
+    finishGalleryDrag();
   });
 }
 

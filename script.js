@@ -3,6 +3,12 @@ const vinylContainers = Array.from(document.querySelectorAll('.vinyl-container')
 const vinylCovers = Array.from(document.querySelectorAll('.vinyl-cover'));
 const vinyls = Array.from(document.querySelectorAll('.vinyl'));
 const filterButtons = Array.from(document.querySelectorAll('.filter-button'));
+const filterDropdown = document.querySelector('.filter-dropdown');
+const filterToggle = document.querySelector('.filter-toggle');
+const viewButtons = Array.from(document.querySelectorAll('.view-button'));
+const galleryView = document.getElementById('gallery-view');
+const galleryTrack = document.getElementById('gallery-track');
+const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
 
 document.body.classList.add('loading');
 
@@ -40,6 +46,7 @@ calculateResponsiveSpacing();
 
 let activeIndex = 0;
 let activeFilter = 'all';
+let activeView = 'gallery';
 const supportsTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 let touchStartY = null;
 let touchCurrentY = null;
@@ -136,13 +143,25 @@ const getVisibleContainers = () => vinylContainers.filter((container) => {
   return (container.dataset.categories || '').split(' ').includes(activeFilter);
 });
 
+const getVisibleGalleryItems = () => galleryItems.filter((item) => {
+  if (activeFilter === 'all') return true;
+  return (item.dataset.categories || '').split(' ').includes(activeFilter);
+});
+
 const setContainerPositions = () => {
   const visibleContainers = getVisibleContainers();
+  const visibleGalleryItems = getVisibleGalleryItems();
 
   vinylContainers.forEach((container) => {
     const isVisible = visibleContainers.includes(container);
     container.classList.toggle('filter-hidden', !isVisible);
     container.setAttribute('aria-hidden', String(!isVisible));
+  });
+
+  galleryItems.forEach((item) => {
+    const isVisible = visibleGalleryItems.includes(item);
+    item.classList.toggle('filter-hidden', !isVisible);
+    item.setAttribute('aria-hidden', String(!isVisible));
   });
 
   visibleContainers.forEach((container, index) => {
@@ -160,6 +179,30 @@ const updateCollectionTransform = () => {
 
 setContainerPositions();
 updateCollectionTransform();
+
+const setActiveView = (view) => {
+  activeView = view;
+  galleryView?.classList.toggle('active', view === 'gallery');
+  vinylCollection?.classList.toggle('active', view === 'vinyl');
+
+  viewButtons.forEach((button) => {
+    const isActive = button.dataset.view === view;
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+
+  const viewSwitch = document.querySelector('.view-switch');
+  if (viewSwitch) {
+    viewSwitch.setAttribute('data-active-view', view);
+  }
+
+  if (view === 'vinyl') {
+    setContainerPositions();
+    updateCollectionTransform();
+  }
+};
+
+setActiveView(activeView);
 
 window.addEventListener('touchstart', (event) => {
   if (event.touches.length !== 1) return;
@@ -330,6 +373,35 @@ contactButton.addEventListener('click', () => {
     if (contactOptions) contactOptions.style.display = 'flex';
 });
 
+viewButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    setActiveView(button.dataset.view || 'gallery');
+  });
+});
+
+const closeFilterMenu = () => {
+  if (!filterDropdown) return;
+  filterDropdown.classList.remove('open');
+  if (filterToggle) {
+    filterToggle.setAttribute('aria-expanded', 'false');
+  }
+};
+
+if (filterToggle) {
+  filterToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (!filterDropdown) return;
+    const isOpen = filterDropdown.classList.toggle('open');
+    filterToggle.setAttribute('aria-expanded', String(isOpen));
+  });
+}
+
+document.addEventListener('click', (event) => {
+  if (filterDropdown && !filterDropdown.contains(event.target)) {
+    closeFilterMenu();
+  }
+});
+
 filterButtons.forEach((button) => {
   button.addEventListener('click', () => {
     filterButtons.forEach((filterButton) => {
@@ -342,6 +414,7 @@ filterButtons.forEach((button) => {
     activeIndex = 0;
     setContainerPositions();
     updateCollectionTransform();
+    closeFilterMenu();
   });
   button.setAttribute('aria-pressed', button.classList.contains('active') ? 'true' : 'false');
 });
@@ -508,7 +581,72 @@ vinyls.forEach((vinyl) => {
 
 
 
+let isDraggingGallery = false;
+let galleryDragStartX = 0;
+let galleryDragStartY = 0;
+let galleryDragOriginScrollLeft = 0;
+let galleryDragOriginScrollTop = 0;
+let galleryPointerActive = false;
 
+if (galleryTrack) {
+  galleryTrack.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    galleryPointerActive = true;
+    isDraggingGallery = false;
+    galleryDragStartX = event.clientX;
+    galleryDragStartY = event.clientY;
+    galleryDragOriginScrollLeft = galleryTrack.scrollLeft;
+    galleryDragOriginScrollTop = galleryTrack.scrollTop;
+    galleryTrack.classList.add('dragging');
+    galleryTrack.setPointerCapture(event.pointerId);
+  });
+
+  galleryTrack.addEventListener('pointermove', (event) => {
+    if (!galleryPointerActive) return;
+    const deltaX = event.clientX - galleryDragStartX;
+    const deltaY = event.clientY - galleryDragStartY;
+
+    if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+      isDraggingGallery = true;
+    }
+
+    galleryTrack.scrollLeft = galleryDragOriginScrollLeft - deltaX;
+    galleryTrack.scrollTop = galleryDragOriginScrollTop - deltaY;
+    event.preventDefault();
+  });
+
+  galleryTrack.addEventListener('pointerup', (event) => {
+    galleryTrack.classList.remove('dragging');
+    galleryPointerActive = false;
+    galleryTrack.releasePointerCapture(event.pointerId);
+    if (!isDraggingGallery) {
+      const targetItem = event.target.closest('.gallery-item');
+      if (targetItem) {
+        const targetUrl = targetItem.dataset.projectUrl || 'project.html';
+        window.location.href = targetUrl;
+      }
+    }
+    isDraggingGallery = false;
+  });
+
+  galleryTrack.addEventListener('pointercancel', () => {
+    galleryTrack.classList.remove('dragging');
+    galleryPointerActive = false;
+    isDraggingGallery = false;
+  });
+}
+
+galleryItems.forEach((item) => {
+  item.addEventListener('click', (event) => {
+    if (isDraggingGallery) {
+      isDraggingGallery = false;
+      event.preventDefault();
+      return;
+    }
+    const targetUrl = item.dataset.projectUrl || 'project.html';
+    window.location.href = targetUrl;
+  });
+});
 
 history.pushState(null, null, location.href);
 

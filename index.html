@@ -51,15 +51,58 @@
 <!--  Main content of the website  -->
 
   <nav class="project-filter" aria-label="Project filters">
-    <button type="button" class="filter-button active" data-filter="all">ALL</button>
-    <button type="button" class="filter-button" data-filter="architecture">ARCHITECTURE</button>
-    <button type="button" class="filter-button" data-filter="computational">COMPUTATIONAL</button>
-    <button type="button" class="filter-button" data-filter="competition">COMPETITION</button>
-    <button type="button" class="filter-button" data-filter="cultural">CULTURAL</button>
+    <div class="view-switch-group">
+      <div class="view-switch" role="tablist" aria-label="Project view mode">
+        <button type="button" class="view-button active" data-view="gallery" aria-pressed="true">2D GALLERY</button>
+        <button type="button" class="view-button" data-view="vinyl" aria-pressed="false">VINYL VIEW</button>
+      </div>
+    </div>
+    <div class="filter-dropdown">
+      <button type="button" class="filter-toggle" aria-expanded="false" aria-controls="filter-menu">
+        FILTER <span class="filter-toggle-caret">^</span>
+      </button>
+      <div class="filter-button-group" id="filter-menu" role="menu">
+        <button type="button" class="filter-button active" data-filter="all">ALL</button>
+        <button type="button" class="filter-button" data-filter="architecture">ARCHITECTURE</button>
+        <button type="button" class="filter-button" data-filter="computational">COMPUTATIONAL</button>
+        <button type="button" class="filter-button" data-filter="competition">COMPETITION</button>
+        <button type="button" class="filter-button" data-filter="cultural">CULTURAL</button>
+      </div>
+    </div>
   </nav>
 
-  <main class="vinyl-collection">
-     <div class="vinyl-container" data-categories="computational">
+  <main class="project-stage">
+    <section class="gallery-view active" id="gallery-view" aria-label="Project gallery">
+      <div class="gallery-track" id="gallery-track">
+        <article class="gallery-item" data-categories="computational" data-project-url="projects/01-Grasshopper.html">
+          <img class="gallery-image" src="01_GRASSHOPPER.png" alt="Grasshopper project preview" />
+          <div class="gallery-caption">GRASSHOPPER</div>
+        </article>
+        <article class="gallery-item" data-categories="architecture competition public" data-project-url="projects/02-Stone-Veil.html">
+          <img class="gallery-image" src="02_STONE VEIL.png" alt="Stone Veil project preview" />
+          <div class="gallery-caption">STONE VEIL</div>
+        </article>
+        <article class="gallery-item" data-categories="architecture community" data-project-url="projects/03-Adda.html">
+          <img class="gallery-image" src="03_ADDA.png" alt="Adda project preview" />
+          <div class="gallery-caption">ADDA</div>
+        </article>
+        <article class="gallery-item" data-categories="architecture competition public" data-project-url="projects/04-Kelip.html">
+          <img class="gallery-image" src="04_KELIP.png" alt="Kelip project preview" />
+          <div class="gallery-caption">KELIP</div>
+        </article>
+        <article class="gallery-item" data-categories="architecture cultural community" data-project-url="projects/05-Aliwal-Music-House.html">
+          <img class="gallery-image" src="05_ALIWAL MUSIC HOUSE.png" alt="Aliwal Music House project preview" />
+          <div class="gallery-caption">ALIWAL MUSIC HOUSE</div>
+        </article>
+        <article class="gallery-item" data-categories="architecture cultural hospitality" data-project-url="projects/06-Tobara.html">
+          <img class="gallery-image" src="06_TOBARA.png" alt="Tobara project preview" />
+          <div class="gallery-caption">TOBARA</div>
+        </article>
+      </div>
+    </section>
+
+    <div class="vinyl-collection">
+      <div class="vinyl-container" data-categories="computational">
        <div class="vinyl-cover" data-project-name="GRASSHOPPER">
          <img class="cover-image" src="01_GRASSHOPPER.png" alt="Album cover 1" />
          <div class="vinyl" data-project-url="projects/01-Grasshopper.html">
@@ -119,6 +162,7 @@
        </div>
      </div>
 -->
+    </div>
   </main>
 
   <div id="text-box" class="text-box">
@@ -133,7 +177,7 @@
   <div id="about-me-text" class="about-me-text">
     <div class="info-row">
       <h2>POSITIONS</h2>
-      <p class="positions-list">YAL-OW MAIN COMMITTEE<br>DPA BIM SPECIALIST<br>BIM TRAINEE</p>
+      <p class="positions-list">YAL-OW MAIN COMMITTEE<br>DPA BIM SPECIALIST<br>DPA BIM TRAINEE</p>
       <p class="positions-years">2026 - CURRENT<br>2026 - CURRENT<br>2025 - 2025</p>
     </div>
 

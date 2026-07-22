@@ -8,6 +8,7 @@ const filterToggle = document.querySelector('.filter-toggle');
 const viewButtons = Array.from(document.querySelectorAll('.view-button'));
 const galleryView = document.getElementById('gallery-view');
 const galleryTrack = document.getElementById('gallery-track');
+const galleryCanvas = document.getElementById('gallery-canvas');
 const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
 
 document.body.classList.add('loading');
@@ -46,7 +47,7 @@ calculateResponsiveSpacing();
 
 let activeIndex = 0;
 let activeFilter = 'all';
-let activeView = 'gallery';
+let activeView = 'vinyl';
 const supportsTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 let touchStartY = null;
 let touchCurrentY = null;
@@ -586,7 +587,14 @@ let galleryDragStartX = 0;
 let galleryDragStartY = 0;
 let galleryDragOriginScrollLeft = 0;
 let galleryDragOriginScrollTop = 0;
+let galleryDragOriginTranslateX = 0;
+let galleryDragOriginTranslateY = 0;
 let galleryPointerActive = false;
+const galleryDragThreshold = 6;
+
+// current transform position (we move the canvas opposite the pointer)
+let canvasTranslateX = 0;
+let canvasTranslateY = 0;
 
 if (galleryTrack) {
   const finishGalleryDrag = () => {
@@ -595,50 +603,111 @@ if (galleryTrack) {
     isDraggingGallery = false;
   };
 
-  galleryTrack.addEventListener('pointerdown', (event) => {
-    if (event.button !== 0) return;
+  const beginGalleryDrag = (clientX, clientY) => {
     galleryPointerActive = true;
     isDraggingGallery = false;
-    galleryDragStartX = event.clientX;
-    galleryDragStartY = event.clientY;
+    galleryDragStartX = clientX;
+    galleryDragStartY = clientY;
     galleryDragOriginScrollLeft = galleryTrack.scrollLeft;
     galleryDragOriginScrollTop = galleryTrack.scrollTop;
+    galleryDragOriginTranslateX = canvasTranslateX;
+    galleryDragOriginTranslateY = canvasTranslateY;
     galleryTrack.classList.add('dragging');
-    galleryTrack.setPointerCapture(event.pointerId);
-    event.preventDefault();
-  });
+  };
 
-  galleryTrack.addEventListener('pointermove', (event) => {
+  const applyCanvasTransform = (x, y) => {
+    canvasTranslateX = x;
+    canvasTranslateY = y;
+    if (galleryCanvas) {
+      galleryCanvas.style.transform = `translate(${canvasTranslateX}px, ${canvasTranslateY}px)`;
+    } else {
+      // fallback to scroll when no canvas present
+      galleryTrack.scrollLeft = -canvasTranslateX;
+      galleryTrack.scrollTop = -canvasTranslateY;
+    }
+  };
+
+  const updateGalleryDrag = (clientX, clientY, event) => {
     if (!galleryPointerActive) return;
-    const deltaX = event.clientX - galleryDragStartX;
-    const deltaY = event.clientY - galleryDragStartY;
+    const deltaX = clientX - galleryDragStartX;
+    const deltaY = clientY - galleryDragStartY;
 
-    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+    if (!isDraggingGallery && (Math.abs(deltaX) > galleryDragThreshold || Math.abs(deltaY) > galleryDragThreshold)) {
       isDraggingGallery = true;
     }
 
-    galleryTrack.scrollLeft = galleryDragOriginScrollLeft - deltaX;
-    galleryTrack.scrollTop = galleryDragOriginScrollTop - deltaY;
+    if (isDraggingGallery) {
+      // move canvas opposite to pointer movement to mimic viewport panning
+      const nextX = galleryDragOriginTranslateX + deltaX;
+      const nextY = galleryDragOriginTranslateY + deltaY;
+      applyCanvasTransform(nextX, nextY);
+      event.preventDefault();
+    }
+  };
+
+  galleryTrack.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    beginGalleryDrag(event.clientX, event.clientY);
     event.preventDefault();
   });
 
-  galleryTrack.addEventListener('pointerup', (event) => {
-    const wasDragging = isDraggingGallery;
-    finishGalleryDrag();
-    galleryTrack.releasePointerCapture(event.pointerId);
-
-    if (!wasDragging) {
-      const targetItem = event.target.closest('.gallery-item');
-      if (targetItem) {
-        const targetUrl = targetItem.dataset.projectUrl || 'project.html';
-        window.location.href = targetUrl;
-      }
-    }
+  galleryTrack.addEventListener('mousedown', (event) => {
+    if (event.button !== 0) return;
+    beginGalleryDrag(event.clientX, event.clientY);
+    event.preventDefault();
   });
 
-  galleryTrack.addEventListener('pointercancel', () => {
-    finishGalleryDrag();
+  galleryTrack.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 1) return;
+    beginGalleryDrag(event.touches[0].clientX, event.touches[0].clientY);
+    event.preventDefault();
+  }, { passive: false });
+
+  // prefer pointer events when available
+  document.addEventListener('pointermove', (event) => {
+    if (!galleryPointerActive) return;
+    updateGalleryDrag(event.clientX, event.clientY, event);
   });
+
+  // keep mousemove as fallback for older browsers
+  document.addEventListener('mousemove', (event) => {
+    if (!galleryPointerActive) return;
+    updateGalleryDrag(event.clientX, event.clientY, event);
+  });
+
+  galleryTrack.addEventListener('touchmove', (event) => {
+    if (!galleryPointerActive || event.touches.length !== 1) return;
+    updateGalleryDrag(event.touches[0].clientX, event.touches[0].clientY, event);
+  }, { passive: false });
+
+  const endGalleryDrag = () => {
+    finishGalleryDrag();
+  };
+
+  document.addEventListener('pointerup', (event) => {
+    if (!galleryPointerActive) return;
+    endGalleryDrag();
+  });
+
+  document.addEventListener('pointercancel', () => {
+    if (!galleryPointerActive) return;
+    endGalleryDrag();
+  });
+
+  document.addEventListener('mouseup', (event) => {
+    if (!galleryPointerActive) return;
+    endGalleryDrag();
+  });
+
+  document.addEventListener('touchend', (event) => {
+    if (!galleryPointerActive) return;
+    endGalleryDrag();
+  }, { passive: true });
+
+  document.addEventListener('touchcancel', (event) => {
+    if (!galleryPointerActive) return;
+    endGalleryDrag();
+  }, { passive: true });
 }
 
 galleryItems.forEach((item) => {

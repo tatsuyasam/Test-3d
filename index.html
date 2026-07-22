@@ -52,9 +52,9 @@
 
   <nav class="project-filter" aria-label="Project filters">
     <div class="view-switch-group">
-      <div class="view-switch" role="tablist" aria-label="Project view mode">
-        <button type="button" class="view-button active" data-view="gallery" aria-pressed="true">2D GALLERY</button>
-        <button type="button" class="view-button" data-view="vinyl" aria-pressed="false">VINYL VIEW</button>
+      <div class="view-switch" role="tablist" aria-label="Project view mode" data-active-view="vinyl">
+        <button type="button" class="view-button" data-view="gallery" aria-pressed="false">2D GALLERY</button>
+        <button type="button" class="view-button active" data-view="vinyl" aria-pressed="true">VINYL VIEW</button>
       </div>
     </div>
     <div class="filter-dropdown">
@@ -72,36 +72,32 @@
   </nav>
 
   <main class="project-stage">
-    <section class="gallery-view active" id="gallery-view" aria-label="Project gallery">
+    <section class="gallery-view" id="gallery-view" aria-label="Project gallery">
       <div class="gallery-track" id="gallery-track">
-        <article class="gallery-item" data-categories="computational" data-project-url="projects/01-Grasshopper.html">
+        <div class="gallery-canvas" id="gallery-canvas">
+        <article class="gallery-item" data-categories="computational" data-project-url="projects/01-Grasshopper.html" style="left: 6%; top: 10%;">
           <img class="gallery-image" src="01_GRASSHOPPER.png" alt="Grasshopper project preview" />
-          <div class="gallery-caption">GRASSHOPPER</div>
         </article>
-        <article class="gallery-item" data-categories="architecture competition public" data-project-url="projects/02-Stone-Veil.html">
+        <article class="gallery-item" data-categories="architecture competition public" data-project-url="projects/02-Stone-Veil.html" style="left: 34%; top: 18%;">
           <img class="gallery-image" src="02_STONE VEIL.png" alt="Stone Veil project preview" />
-          <div class="gallery-caption">STONE VEIL</div>
         </article>
-        <article class="gallery-item" data-categories="architecture community" data-project-url="projects/03-Adda.html">
+        <article class="gallery-item" data-categories="architecture community" data-project-url="projects/03-Adda.html" style="left: 62%; top: 10%;">
           <img class="gallery-image" src="03_ADDA.png" alt="Adda project preview" />
-          <div class="gallery-caption">ADDA</div>
         </article>
-        <article class="gallery-item" data-categories="architecture competition public" data-project-url="projects/04-Kelip.html">
+        <article class="gallery-item" data-categories="architecture competition public" data-project-url="projects/04-Kelip.html" style="left: 16%; top: 48%;">
           <img class="gallery-image" src="04_KELIP.png" alt="Kelip project preview" />
-          <div class="gallery-caption">KELIP</div>
         </article>
-        <article class="gallery-item" data-categories="architecture cultural community" data-project-url="projects/05-Aliwal-Music-House.html">
+        <article class="gallery-item" data-categories="architecture cultural community" data-project-url="projects/05-Aliwal-Music-House.html" style="left: 46%; top: 54%;">
           <img class="gallery-image" src="05_ALIWAL MUSIC HOUSE.png" alt="Aliwal Music House project preview" />
-          <div class="gallery-caption">ALIWAL MUSIC HOUSE</div>
         </article>
-        <article class="gallery-item" data-categories="architecture cultural hospitality" data-project-url="projects/06-Tobara.html">
+        <article class="gallery-item" data-categories="architecture cultural hospitality" data-project-url="projects/06-Tobara.html" style="left: 74%; top: 46%;">
           <img class="gallery-image" src="06_TOBARA.png" alt="Tobara project preview" />
-          <div class="gallery-caption">TOBARA</div>
         </article>
+        </div>
       </div>
     </section>
 
-    <div class="vinyl-collection">
+    <div class="vinyl-collection active">
       <div class="vinyl-container" data-categories="computational">
        <div class="vinyl-cover" data-project-name="GRASSHOPPER">
          <img class="cover-image" src="01_GRASSHOPPER.png" alt="Album cover 1" />
@@ -150,7 +146,46 @@
          </div>
        </div>
      </div>
-
+     <div class="vinyl-container" data-categories="architecture competition public">
+       <div class="vinyl-cover" data-project-name="STONE VEIL">
+         <img class="cover-image" src="02_STONE VEIL.png" alt="Album cover 2" />
+         <div class="vinyl" data-project-url="projects/02-Stone-Veil.html">
+             <img class="vinyl-image" src="02_Vinyl.png" alt="Vinyl record 2" />
+         </div>
+       </div>
+     </div>
+     <div class="vinyl-container" data-categories="architecture community">
+       <div class="vinyl-cover" data-project-name="ADDA">
+         <img class="cover-image" src="03_ADDA.png" alt="Album cover 3" />
+         <div class="vinyl" data-project-url="projects/03-Adda.html">
+             <img class="vinyl-image" src="03_Vinyl.png" alt="Vinyl record 3 " />
+         </div>
+       </div>
+     </div>
+     <div class="vinyl-container" data-categories="architecture competition public">
+       <div class="vinyl-cover" data-project-name="KELIP">
+         <img class="cover-image" src="04_KELIP.png" alt="Album cover 4" />
+         <div class="vinyl" data-project-url="projects/04-Kelip.html">
+             <img class="vinyl-image" src="04_Vinyl.png" alt="Vinyl record 4" />
+         </div>
+       </div>
+     </div>
+     <div class="vinyl-container" data-categories="architecture cultural community">
+       <div class="vinyl-cover" data-project-name="ALIWAL MUSIC HOUSE">
+         <img class="cover-image" src="05_ALIWAL MUSIC HOUSE.png" alt="Album cover 5" />
+         <div class="vinyl" data-project-url="projects/05-Aliwal-Music-House.html">
+             <img class="vinyl-image" src="05_Vinyl.png" alt="Vinyl record 5" />
+         </div>
+       </div>
+     </div>
+         <div class="vinyl-container" data-categories="architecture cultural hospitality">
+       <div class="vinyl-cover" data-project-name="TOBARA">
+         <img class="cover-image" src="06_TOBARA.png" alt="Album cover 6" />
+         <div class="vinyl" data-project-url="projects/06-Tobara.html">
+             <img class="vinyl-image" src="06_Vinyl.png" alt="Vinyl record 6" />
+         </div>
+       </div>
+     </div>
 <!--
      </div>
          <div class="vinyl-container">

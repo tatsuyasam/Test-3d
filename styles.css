@@ -435,7 +435,7 @@ body.dark-grey-background::before {
 }
 
 .gallery-item:hover {
-    transform: translateY(-4px) scale(1.01);
+    transform: translateX(0) scale(1.01);
 }
 
 .gallery-image {
@@ -678,13 +678,11 @@ body.transitioning .vinyl:not(.fly-right) {
     display: none;
 }
 
-/* Hover effect to slide the vinyl fully out of the cover */
-.vinyl-container:hover .vinyl {
-    left: 95%;
-}
-
+/* Hover effect to nudge the vinyl out to the side of the cover */
+.vinyl-container:hover .vinyl,
 .vinyl:hover {
-    transform: rotate(0deg); /* No rotation on hover */
+    left: 62%;
+    transform: translateX(18px) rotate(-4deg) scale(1.02);
 }
 
 /* Custom cursor text for vinyl covers */
@@ -718,8 +716,8 @@ body.touch-device .vinyl-cover.touch-hover {
 }
 
 body.touch-device .vinyl-cover.touch-hover .vinyl {
-    left: 95%;
-    transform: translate(0, 0) scale(1.05);
+    left: 62%;
+    transform: translateX(18px) rotate(-4deg) scale(1.05);
 }
 
 body.touch-device .vinyl-cover.touch-hover::after {

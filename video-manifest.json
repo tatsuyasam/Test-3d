@@ -1,1 +1,15 @@
-{}
+{
+  "05-Aliwal": {
+    "url": "https://res.cloudinary.com/qwtty3hl/video/upload/v1784914561/sams-portfolio/05-Aliwal/video.mp4",
+    "type": "video/mp4",
+    "filename": "video-web.mp4",
+    "size": 64238745,
+    "sha256": "c43d45f58efba3125aef9a20db17880e45e8705e0bdb7bc0eccca832bdd887ff",
+    "publicId": "sams-portfolio/05-Aliwal/video",
+    "version": 1784914561,
+    "width": 1920,
+    "height": 1080,
+    "duration": 77.738,
+    "format": "mp4"
+  }
+}

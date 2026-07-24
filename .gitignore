@@ -4,7 +4,7 @@
 # Installed upload tooling
 node_modules/
 
-# Large project videos are uploaded to R2 and represented by video-manifest.json
+# Large project videos are uploaded to Cloudinary and represented by video-manifest.json
 projects/*/*.mp4
 projects/*/*.webm
 projects/*/*.mov

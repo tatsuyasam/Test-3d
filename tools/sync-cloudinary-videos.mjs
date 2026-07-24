@@ -3,8 +3,7 @@ import { createReadStream, existsSync, readFileSync, watch, writeFileSync } from
 import { readdir, stat } from 'node:fs/promises';
 import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { S3Client } from '@aws-sdk/client-s3';
-import { Upload } from '@aws-sdk/lib-storage';
+import { v2 as cloudinary } from 'cloudinary';
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const projectsRoot = join(appRoot, 'projects');
@@ -34,28 +33,25 @@ function loadLocalEnv() {
   }
 }
 
-function requireR2Config() {
+function configureCloudinary() {
   const required = [
-    'R2_ACCOUNT_ID',
-    'R2_ACCESS_KEY_ID',
-    'R2_SECRET_ACCESS_KEY',
-    'R2_BUCKET',
-    'R2_PUBLIC_BASE_URL'
+    'CLOUDINARY_CLOUD_NAME',
+    'CLOUDINARY_API_KEY',
+    'CLOUDINARY_API_SECRET'
   ];
   const missing = required.filter((name) => !process.env[name]);
   if (missing.length) {
     throw new Error(
-      `Missing ${missing.join(', ')}. Copy .env.example to .env and add your R2 settings.`
+      `Missing ${missing.join(', ')}. Copy .env.example to .env and add your Cloudinary settings.`
     );
   }
 
-  return {
-    accountId: process.env.R2_ACCOUNT_ID,
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-    bucket: process.env.R2_BUCKET,
-    publicBaseUrl: process.env.R2_PUBLIC_BASE_URL.replace(/\/+$/, '')
-  };
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true
+  });
 }
 
 function readManifest() {
@@ -91,8 +87,13 @@ async function findProjectVideos() {
     const candidates = files
       .filter((file) => file.isFile() && supportedExtensions.has(extname(file.name).toLowerCase()))
       .sort((left, right) => {
-        const leftPreferred = /^video\./i.test(left.name) ? 0 : 1;
-        const rightPreferred = /^video\./i.test(right.name) ? 0 : 1;
+        const priority = (name) => {
+          if (/^video-web\./i.test(name)) return 0;
+          if (/^video\./i.test(name)) return 1;
+          return 2;
+        };
+        const leftPreferred = priority(left.name);
+        const rightPreferred = priority(right.name);
         return leftPreferred - rightPreferred || left.name.localeCompare(right.name);
       });
 
@@ -111,23 +112,32 @@ async function findProjectVideos() {
   return videos;
 }
 
-function publicObjectUrl(baseUrl, key) {
-  return `${baseUrl}/${key.split('/').map(encodeURIComponent).join('/')}`;
+function uploadLargeVideo(video, sha256) {
+  return new Promise((resolveUpload, rejectUpload) => {
+    cloudinary.uploader.upload_chunked(
+      video.path,
+      {
+        resource_type: 'video',
+        public_id: `sams-portfolio/${video.project}/video`,
+        overwrite: true,
+        invalidate: true,
+        chunk_size: 10 * 1024 * 1024,
+        context: `sha256=${sha256}|original_filename=${video.filename}`
+      },
+      (error, result) => {
+        if (error) rejectUpload(error);
+        else if (result?.done === false) return;
+        else resolveUpload(result);
+      }
+    );
+  });
 }
 
 async function syncVideos() {
   loadLocalEnv();
-  const config = requireR2Config();
+  configureCloudinary();
   const manifest = readManifest();
   const videos = await findProjectVideos();
-  const client = new S3Client({
-    region: 'auto',
-    endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
-    credentials: {
-      accessKeyId: config.accessKeyId,
-      secretAccessKey: config.secretAccessKey
-    }
-  });
 
   if (!videos.length) {
     console.log('No project videos found.');
@@ -138,7 +148,6 @@ async function syncVideos() {
     const fileStats = await stat(video.path);
     const sha256 = await hashFile(video.path);
     const extension = extname(video.filename).toLowerCase();
-    const objectKey = `projects/${video.project}/${video.filename}`;
     const current = manifest[video.project];
 
     if (current?.sha256 === sha256 && current?.url) {
@@ -149,39 +158,23 @@ async function syncVideos() {
     console.log(
       `[${video.project}] Uploading ${relative(appRoot, video.path)} (${(fileStats.size / 1048576).toFixed(1)} MB)...`
     );
-    let lastPercent = -1;
-    const upload = new Upload({
-      client,
-      params: {
-        Bucket: config.bucket,
-        Key: objectKey,
-        Body: createReadStream(video.path),
-        ContentType: mimeTypes[extension] || 'application/octet-stream',
-        ContentDisposition: 'inline',
-        CacheControl: 'public, max-age=31536000, immutable',
-        Metadata: { sha256 }
-      },
-      queueSize: 4,
-      partSize: 10 * 1024 * 1024,
-      leavePartsOnError: false
-    });
+    const result = await uploadLargeVideo(video, sha256);
+    if (!result?.secure_url) {
+      throw new Error(`Cloudinary did not return a delivery URL for ${video.project}.`);
+    }
 
-    upload.on('httpUploadProgress', ({ loaded = 0, total = fileStats.size }) => {
-      const percent = Math.floor((loaded / total) * 100);
-      if (percent >= lastPercent + 5 || percent === 100) {
-        process.stdout.write(`  ${percent}%\n`);
-        lastPercent = percent;
-      }
-    });
-
-    const result = await upload.done();
     manifest[video.project] = {
-      url: publicObjectUrl(config.publicBaseUrl, objectKey),
-      type: mimeTypes[extension] || 'application/octet-stream',
+      url: result.secure_url,
+      type: mimeTypes[extension] || 'video/mp4',
       filename: video.filename,
-      size: fileStats.size,
+      size: result.bytes || fileStats.size,
       sha256,
-      etag: result.ETag?.replaceAll('"', '') || ''
+      publicId: result.public_id,
+      version: result.version,
+      width: result.width,
+      height: result.height,
+      duration: result.duration,
+      format: result.format
     };
     writeManifest(manifest);
     console.log(`[${video.project}] Uploaded and manifest updated.`);

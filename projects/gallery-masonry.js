@@ -18,7 +18,7 @@
     const colWidth = parseInt(getComputedStyle(grid).getPropertyValue('--gallery-column-width')) || 12;
     const gap = parseInt(getComputedStyle(grid).getPropertyValue('gap')) || 24;
     const items = Array.from(grid.querySelectorAll('.gallery-item'));
-
+ 
     items.forEach(item => {
       const img = item.querySelector('img');
       if (!img) return;
@@ -279,7 +279,10 @@
 
       const label = document.createElement('span');
       label.className = 'project-nav-vinyl-label';
-      label.textContent = direction === 'previous' ? 'Prev proj' : 'Next proj';
+      label.innerHTML = `
+        <small>${direction === 'previous' ? 'Previous project' : 'Next project'}</small>
+        <strong>${project.label}</strong>
+      `;
 
       record.appendChild(linkImg);
       link.appendChild(record);
@@ -328,23 +331,42 @@
       <button type="button" class="lightbox-btn lightbox-prev" aria-label="Previous image">&lt;</button>
       <figure class="lightbox-figure">
         <img class="lightbox-image" alt="">
-        <figcaption class="lightbox-caption"></figcaption>
+        <figcaption class="lightbox-caption">
+          <span class="lightbox-count"></span>
+          <span class="lightbox-caption-text"></span>
+        </figcaption>
       </figure>
       <button type="button" class="lightbox-btn lightbox-next" aria-label="Next image">&gt;</button>
     `;
     document.body.appendChild(lightbox);
 
     const lightboxImage = lightbox.querySelector('.lightbox-image');
-    const caption = lightbox.querySelector('.lightbox-caption');
+    const captionText = lightbox.querySelector('.lightbox-caption-text');
+    const lightboxCount = lightbox.querySelector('.lightbox-count');
     const closeButton = lightbox.querySelector('.lightbox-close');
     const prevButton = lightbox.querySelector('.lightbox-prev');
     const nextButton = lightbox.querySelector('.lightbox-next');
 
-    const renderImage = () => {
+    let imageTransitionTimer = null;
+    const renderImage = (direction = 0, immediate = false) => {
       const image = images[activeImageIndex];
-      lightboxImage.src = image.currentSrc || image.src;
-      lightboxImage.alt = image.alt || 'Project image';
-      caption.textContent = `${activeImageIndex + 1} / ${images.length} ${image.alt || 'Project image'}`;
+      const updateImage = () => {
+        lightboxImage.src = image.currentSrc || image.src;
+        lightboxImage.alt = image.alt || 'Project image';
+        lightboxCount.textContent = `${String(activeImageIndex + 1).padStart(2, '0')} / ${String(images.length).padStart(2, '0')}`;
+        captionText.textContent = image.alt || 'Project image';
+        lightboxImage.style.setProperty('--lightbox-direction', direction);
+        lightboxImage.classList.remove('is-changing');
+      };
+
+      clearTimeout(imageTransitionTimer);
+      if (immediate) {
+        updateImage();
+        return;
+      }
+
+      lightboxImage.classList.add('is-changing');
+      imageTransitionTimer = window.setTimeout(updateImage, 150);
     };
 
     const closeLightbox = () => {
@@ -356,7 +378,7 @@
     const openLightbox = (index, trigger) => {
       activeImageIndex = index;
       previousFocus = trigger;
-      renderImage();
+      renderImage(0, true);
       lightbox.classList.add('open');
       document.body.classList.add('lightbox-open');
       closeButton.focus();
@@ -364,12 +386,12 @@
 
     const showPrevious = () => {
       activeImageIndex = (activeImageIndex - 1 + images.length) % images.length;
-      renderImage();
+      renderImage(-1);
     };
 
     const showNext = () => {
       activeImageIndex = (activeImageIndex + 1) % images.length;
-      renderImage();
+      renderImage(1);
     };
 
     images.forEach((image, index) => {
@@ -397,6 +419,191 @@
       if (event.key === 'Escape') closeLightbox();
       if (event.key === 'ArrowLeft') showPrevious();
       if (event.key === 'ArrowRight') showNext();
+    });
+  }
+
+  function initProjectExperience() {
+    if (document.body.classList.contains('project-experience-ready')) return;
+    document.body.classList.add('project-experience-ready');
+
+    const header = document.querySelector('.project-header-bar');
+    const progress = document.createElement('div');
+    progress.className = 'project-scroll-progress';
+    progress.setAttribute('aria-hidden', 'true');
+    progress.innerHTML = '<span></span>';
+    document.body.appendChild(progress);
+    const progressBar = progress.querySelector('span');
+
+    let scrollFrame = null;
+    const updateScrollExperience = () => {
+      const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      progressBar.style.transform = `scaleX(${Math.min(window.scrollY / maxScroll, 1)})`;
+      if (header) header.classList.toggle('is-compact', window.scrollY > 56);
+      scrollFrame = null;
+    };
+
+    window.addEventListener('scroll', () => {
+      if (scrollFrame) return;
+      scrollFrame = requestAnimationFrame(updateScrollExperience);
+    }, { passive: true });
+    window.addEventListener('resize', updateScrollExperience, { passive: true });
+    updateScrollExperience();
+
+    const revealTargets = Array.from(document.querySelectorAll(
+      '.hero-image, .hero-copy, .project-metadata, .text-image-section, .project-video-slot, .gallery-section'
+    ));
+    revealTargets.forEach((element, index) => {
+      element.classList.add('reveal-on-scroll');
+      element.style.transitionDelay = `${Math.min(index % 3, 2) * 70}ms`;
+    });
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        });
+      }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -8% 0px'
+      });
+      revealTargets.forEach((element) => observer.observe(element));
+    } else {
+      revealTargets.forEach((element) => element.classList.add('is-visible'));
+    }
+
+    if (window.matchMedia('(hover: hover)').matches) {
+      window.addEventListener('pointermove', (event) => {
+        const navVinyls = Array.from(document.querySelectorAll('.project-nav-vinyl'));
+        let nearestVinyl = null;
+        let nearestDistance = 160;
+
+        navVinyls.forEach((vinyl) => {
+          const bounds = vinyl.getBoundingClientRect();
+          const centerX = bounds.left + bounds.width / 2;
+          const centerY = bounds.top + bounds.height / 2;
+          const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestVinyl = vinyl;
+          }
+        });
+
+        navVinyls.forEach((vinyl) => {
+          vinyl.classList.toggle('is-near', vinyl === nearestVinyl);
+        });
+      }, { passive: true });
+
+      document.documentElement.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.project-nav-vinyl.is-near').forEach((vinyl) => {
+          vinyl.classList.remove('is-near');
+        });
+      });
+    }
+  }
+
+  async function initLazyProjectVideo() {
+    if (document.querySelector('.project-video-slot:not([data-video-placeholder])')) return;
+
+    const heroImage = document.querySelector('.hero-image img');
+    const gallerySection = document.querySelector('.gallery-section');
+    if (!heroImage || !gallerySection || location.protocol === 'file:') return;
+
+    const heroUrl = new URL(heroImage.getAttribute('src'), location.href);
+    const contentFolder = new URL('./', heroUrl);
+    const videoNames = ['video.mp4', 'video.webm', 'video.mov', 'video.m4v'];
+    let videoUrl = null;
+    let videoType = '';
+
+    for (const filename of videoNames) {
+      const candidate = new URL(filename, contentFolder);
+      try {
+        const response = await fetch(candidate.href, {
+          method: 'HEAD',
+          cache: 'no-store'
+        });
+        if (!response.ok) continue;
+        videoUrl = candidate;
+        videoType = response.headers.get('content-type') || '';
+        break;
+      } catch {
+        // A missing candidate is expected; try the next supported filename.
+      }
+    }
+
+    if (!videoUrl) return;
+
+    const existingPlaceholders = document.querySelectorAll('.project-video-slot[data-video-placeholder]');
+    existingPlaceholders.forEach((placeholder) => placeholder.remove());
+
+    const section = document.createElement('section');
+    section.className = 'project-video-slot project-video-lazy reveal-on-scroll';
+    section.setAttribute('aria-labelledby', 'project-video-heading');
+    section.innerHTML = `
+      <div class="video-slot-header">
+        <p class="eyebrow">Motion</p>
+        <h2 id="project-video-heading">Project Video</h2>
+      </div>
+      <div class="video-frame">
+        <button type="button" class="video-load-button" aria-label="Load and play project video">
+          <img src="${heroImage.currentSrc || heroImage.src}" alt="" aria-hidden="true">
+          <span class="video-load-overlay">
+            <span class="video-play-icon" aria-hidden="true"></span>
+          </span>
+        </button>
+      </div>
+    `;
+    gallerySection.parentNode.insertBefore(section, gallerySection);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => section.classList.add('is-visible'));
+    });
+
+    const frame = section.querySelector('.video-frame');
+    const loadButton = section.querySelector('.video-load-button');
+    loadButton.addEventListener('click', () => {
+      if (frame.classList.contains('is-loaded')) return;
+
+      const video = document.createElement('video');
+      video.className = 'project-video-player';
+      video.controls = true;
+      video.playsInline = true;
+      video.preload = 'metadata';
+      video.disablePictureInPicture = true;
+      video.setAttribute('controlsList', 'nodownload noremoteplayback');
+      video.setAttribute('disablePictureInPicture', '');
+      video.setAttribute('oncontextmenu', 'return false;');
+      video.setAttribute('aria-label', 'Project video');
+
+      const source = document.createElement('source');
+      source.src = videoUrl.href;
+      if (videoType) source.type = videoType;
+      video.appendChild(source);
+
+      frame.classList.add('is-loaded');
+      frame.replaceChildren(video);
+      video.load();
+      const playRequest = video.play();
+      if (playRequest) playRequest.catch(() => {});
+    }, { once: true });
+  }
+
+  function protectProjectMedia() {
+    document.addEventListener('dragstart', (event) => {
+      if (event.target instanceof HTMLImageElement || event.target instanceof HTMLVideoElement) {
+        event.preventDefault();
+      }
+    });
+
+    document.addEventListener('contextmenu', (event) => {
+      if (event.target instanceof HTMLImageElement || event.target instanceof HTMLVideoElement) {
+        event.preventDefault();
+      }
+    });
+
+    document.querySelectorAll('img').forEach((image) => {
+      image.draggable = false;
     });
   }
 
@@ -434,6 +641,9 @@
     window.addEventListener('keydown', dismissOnInteraction, { once: true });
   }
 
+  initProjectExperience();
+  initLazyProjectVideo();
+  protectProjectMedia();
   showProjectInteractionHint();
   window.addEventListener('resize', initVinyl);
 

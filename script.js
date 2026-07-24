@@ -1110,12 +1110,11 @@ if (video) {
 
 const navEntry = performance.getEntriesByType("navigation")[0];
 
-const isReload = navEntry?.type === "reload";
 const isBackForward = navEntry?.type === "back_forward";
-const hasVisited = localStorage.getItem('hasVisited') === 'true';
+const hasVisited = sessionStorage.getItem('hasVisited') === 'true';
 
 const skipLoader =
-  hasVisited || isReload || isBackForward || isReturningFromProject;
+  hasVisited || isBackForward || isReturningFromProject;
 
 const loader = document.getElementById('loader');
 const percentText = document.getElementById('loader-percent');
@@ -1126,7 +1125,7 @@ if (skipLoader) {
   autoScrollVinyls();
 } else {
 
-  localStorage.setItem('hasVisited', 'true');
+  sessionStorage.setItem('hasVisited', 'true');
   document.body.classList.add('loading');
 
   window.addEventListener('load', () => {

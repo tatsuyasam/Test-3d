@@ -563,7 +563,13 @@ body.dark-grey-background::before {
 }
 
 .vinyl-collection.scrolling {
-    transition: transform 0.6s ease-out, opacity 0.4s ease;
+    transition:
+        transform 0.28s cubic-bezier(0.22, 0.78, 0.28, 1),
+        opacity 0.2s ease;
+}
+
+.vinyl-collection.gesturing {
+    transition: none;
 }
 
 .vinyl-container {

@@ -55,6 +55,8 @@ let touchStartY = null;
 let touchCurrentY = null;
 let touchMoved = false;
 let touchAccumulated = 0;
+let touchLastTime = 0;
+let touchVelocityY = 0;
 const touchThreshold = 8;
 const touchStep = 0.35; // Increased for better responsiveness
 let lastTouchedCover = null;
@@ -213,10 +215,14 @@ const setActiveView = (view) => {
 setActiveView(activeView);
 
 window.addEventListener('touchstart', (event) => {
+  if (activeView !== 'vinyl') return;
   if (event.touches.length !== 1) return;
   touchStartY = event.touches[0].clientY;
   touchCurrentY = touchStartY;
   touchMoved = false;
+  touchLastTime = performance.now();
+  touchVelocityY = 0;
+  vinylCollection.classList.add('scrolling', 'gesturing');
   if (autoScrollAnimationId) {
     cancelAnimationFrame(autoScrollAnimationId);
     autoScrollAnimationId = null;
@@ -225,9 +231,14 @@ window.addEventListener('touchstart', (event) => {
 }, { passive: false });
 
 window.addEventListener('touchmove', (event) => {
+  if (activeView !== 'vinyl') return;
   if (!supportsTouch || touchStartY === null || event.touches.length !== 1) return;
   const touchY = event.touches[0].clientY;
   const deltaY = touchY - touchCurrentY;
+  const currentTime = performance.now();
+  const elapsed = Math.max(currentTime - touchLastTime, 1);
+  touchVelocityY = touchVelocityY * 0.65 + (deltaY / elapsed) * 0.35;
+  touchLastTime = currentTime;
   if (Math.abs(deltaY) < 2) return;
   touchMoved = true;
   touchCurrentY = touchY;
@@ -249,17 +260,36 @@ window.addEventListener('touchmove', (event) => {
 }, { passive: false });
 
 window.addEventListener('touchend', () => {
+  if (activeView !== 'vinyl') return;
+  vinylCollection.classList.remove('gesturing');
+  const releaseVelocity = touchVelocityY;
+  if (touchMoved && Math.abs(releaseVelocity) > 0.06) {
+    const coastDirection = releaseVelocity > 0 ? -1 : 1;
+    const coastDistance = Math.min(Math.abs(releaseVelocity) * 0.45, 0.28);
+    requestAnimationFrame(() => {
+      activeIndex = clamp(
+        activeIndex + coastDirection * coastDistance,
+        0,
+        Math.max(getVisibleContainers().length - 1, 0)
+      );
+      updateCollectionTransform();
+    });
+  }
   touchStartY = null;
   touchCurrentY = null;
   touchMoved = false;
   touchAccumulated = 0;
+  touchVelocityY = 0;
 });
 
 window.addEventListener('touchcancel', () => {
+  if (activeView !== 'vinyl') return;
+  vinylCollection.classList.remove('gesturing');
   touchStartY = null;
   touchCurrentY = null;
   touchMoved = false;
   touchAccumulated = 0;
+  touchVelocityY = 0;
 });
 
 // Auto-scroll animation on page load
@@ -311,9 +341,10 @@ window.addEventListener('resize', () => {
 });
 
 let isScrolling = false;
-const scrollStep = 0.5; // Smaller fraction per wheel event makes scroll less sensitive
+const scrollStep = 0.3;
 
 window.addEventListener('wheel', (event) => {
+  if (activeView !== 'vinyl') return;
   event.preventDefault();
   
   // Stop auto-scroll if user scrolls manually
@@ -637,6 +668,7 @@ const galleryDragThreshold = 6;
 let canvasTranslateX = 0;
 let canvasTranslateY = 0;
 let canvasScale = 1;
+let galleryRenderFrame = null;
 
 function centerGalleryCanvas() {
   if (!galleryTrack || !galleryCanvas) return;
@@ -648,15 +680,28 @@ function centerGalleryCanvas() {
 }
 
 if (galleryTrack) {
+  let galleryDragBounds = null;
+  let galleryMetrics = null;
+
+  const refreshGalleryMetrics = () => {
+    galleryMetrics = {
+      trackWidth: galleryTrack.clientWidth,
+      trackHeight: galleryTrack.clientHeight,
+      canvasWidth: galleryCanvas?.offsetWidth || 0,
+      canvasHeight: galleryCanvas?.offsetHeight || 0
+    };
+  };
+
   const getGalleryBounds = () => {
     if (!galleryCanvas) {
       return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
     }
 
-    const trackWidth = galleryTrack.clientWidth;
-    const trackHeight = galleryTrack.clientHeight;
-    const canvasWidth = galleryCanvas.offsetWidth * canvasScale;
-    const canvasHeight = galleryCanvas.offsetHeight * canvasScale;
+    if (!galleryMetrics) refreshGalleryMetrics();
+    const trackWidth = galleryMetrics.trackWidth;
+    const trackHeight = galleryMetrics.trackHeight;
+    const canvasWidth = galleryMetrics.canvasWidth * canvasScale;
+    const canvasHeight = galleryMetrics.canvasHeight * canvasScale;
     const centeredX = (trackWidth - canvasWidth) / 2;
     const centeredY = (trackHeight - canvasHeight) / 2;
     const horizontalAllowance = clamp(trackWidth * 0.3, 180, 420);
@@ -684,7 +729,11 @@ if (galleryTrack) {
     canvasTranslateX = x;
     canvasTranslateY = y;
     if (galleryCanvas) {
-      galleryCanvas.style.transform = `translate(${canvasTranslateX}px, ${canvasTranslateY}px) scale(${canvasScale})`;
+      if (galleryRenderFrame !== null) return;
+      galleryRenderFrame = requestAnimationFrame(() => {
+        galleryCanvas.style.transform = `translate3d(${canvasTranslateX}px, ${canvasTranslateY}px, 0) scale(${canvasScale})`;
+        galleryRenderFrame = null;
+      });
     } else {
       galleryTrack.scrollLeft = -canvasTranslateX;
       galleryTrack.scrollTop = -canvasTranslateY;
@@ -726,6 +775,8 @@ if (galleryTrack) {
     galleryDragOriginScrollTop = galleryTrack.scrollTop;
     galleryDragOriginTranslateX = canvasTranslateX;
     galleryDragOriginTranslateY = canvasTranslateY;
+    refreshGalleryMetrics();
+    galleryDragBounds = getGalleryBounds();
     galleryTrack.classList.add('dragging');
   };
 
@@ -742,7 +793,7 @@ if (galleryTrack) {
     if (isDraggingGallery) {
       const nextX = galleryDragOriginTranslateX + deltaX;
       const nextY = galleryDragOriginTranslateY + deltaY;
-      const bounds = getGalleryBounds();
+      const bounds = galleryDragBounds || getGalleryBounds();
       applyCanvasTransform(
         applyEdgeResistance(nextX, bounds.minX, bounds.maxX),
         applyEdgeResistance(nextY, bounds.minY, bounds.maxY)
@@ -869,7 +920,10 @@ if (galleryTrack) {
     }, { passive: true });
   }
 
-  window.addEventListener('resize', springGalleryIntoBounds);
+  window.addEventListener('resize', () => {
+    refreshGalleryMetrics();
+    springGalleryIntoBounds();
+  });
 }
 
 galleryItems.forEach((item) => {

@@ -1,0 +1,12 @@
+# Local secrets
+.env
+
+# Installed upload tooling
+node_modules/
+
+# Large project videos are uploaded to R2 and represented by video-manifest.json
+projects/*/*.mp4
+projects/*/*.webm
+projects/*/*.mov
+projects/*/*.m4v
+projects/*/*.ogv

@@ -508,15 +508,35 @@
 
     const heroImage = document.querySelector('.hero-image img');
     const gallerySection = document.querySelector('.gallery-section');
-    if (!heroImage || !gallerySection || location.protocol === 'file:') return;
+    if (!heroImage || !gallerySection) return;
 
     const heroUrl = new URL(heroImage.getAttribute('src'), location.href);
     const contentFolder = new URL('./', heroUrl);
+    const projectFolder = decodeURIComponent(
+      contentFolder.pathname.split('/').filter(Boolean).at(-1) || ''
+    );
     const videoNames = ['video.mp4', 'video.webm', 'video.mov', 'video.m4v'];
     let videoUrl = null;
     let videoType = '';
 
-    for (const filename of videoNames) {
+    try {
+      const manifestResponse = await fetch(new URL('../video-manifest.json', location.href), {
+        cache: 'no-cache'
+      });
+      if (manifestResponse.ok) {
+        const manifest = await manifestResponse.json();
+        const hostedVideo = manifest[projectFolder];
+        if (hostedVideo?.url) {
+          videoUrl = new URL(hostedVideo.url);
+          videoType = hostedVideo.type || '';
+        }
+      }
+    } catch {
+      // Local file previews may not allow fetch; fall back to local detection below.
+    }
+
+    for (const filename of videoUrl ? [] : videoNames) {
+      if (location.protocol === 'file:') break;
       const candidate = new URL(filename, contentFolder);
       try {
         const response = await fetch(candidate.href, {

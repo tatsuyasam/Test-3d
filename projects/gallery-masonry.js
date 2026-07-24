@@ -396,6 +396,40 @@
     });
   }
 
+  function showProjectInteractionHint() {
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const storageKey = `projectInteractionHint:${location.pathname}:${isTouch ? 'touch' : 'pointer'}`;
+    if (sessionStorage.getItem(storageKey) === 'shown') return;
+
+    const hint = document.createElement('div');
+    hint.className = 'project-interaction-hint';
+    hint.innerHTML = `
+      <span class="project-hint-mark" aria-hidden="true"></span>
+      <span>${isTouch
+        ? 'SWIPE TO EXPLORE · TAP IMAGES TO EXPAND'
+        : 'SCROLL TO EXPLORE · CLICK IMAGES TO EXPAND'}</span>
+    `;
+    hint.setAttribute('role', 'status');
+    document.body.appendChild(hint);
+    sessionStorage.setItem(storageKey, 'shown');
+
+    const dismiss = () => {
+      hint.classList.remove('visible');
+      window.setTimeout(() => hint.remove(), 300);
+    };
+
+    requestAnimationFrame(() => hint.classList.add('visible'));
+    const timer = window.setTimeout(dismiss, 4200);
+    const dismissOnInteraction = () => {
+      clearTimeout(timer);
+      dismiss();
+    };
+    window.addEventListener('pointerdown', dismissOnInteraction, { once: true, passive: true });
+    window.addEventListener('wheel', dismissOnInteraction, { once: true, passive: true });
+    window.addEventListener('keydown', dismissOnInteraction, { once: true });
+  }
+
+  showProjectInteractionHint();
   window.addEventListener('resize', initVinyl);
 
 })();

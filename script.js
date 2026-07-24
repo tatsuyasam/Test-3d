@@ -11,6 +11,7 @@ const galleryView = document.getElementById('gallery-view');
 const galleryTrack = document.getElementById('gallery-track');
 const galleryCanvas = document.getElementById('gallery-canvas');
 const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
+const interactionHint = document.getElementById('interaction-hint');
 
 document.body.classList.add('loading');
 
@@ -55,6 +56,8 @@ let activeFilter = 'all';
 const savedView = sessionStorage.getItem('portfolioView');
 let activeView = savedView === 'gallery' || savedView === 'vinyl' ? savedView : 'vinyl';
 const supportsTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+let interactionHintTimer = null;
+let interactionHintRetryTimer = null;
 let touchStartY = null;
 let touchCurrentY = null;
 let touchMoved = false;
@@ -63,6 +66,50 @@ let touchVelocityY = 0;
 const touchThreshold = 8;
 let lastTouchedCover = null;
 let touchHoverTimeout = null;
+
+const dismissInteractionHint = () => {
+  clearTimeout(interactionHintTimer);
+  clearTimeout(interactionHintRetryTimer);
+  if (!interactionHint) return;
+  interactionHint.classList.remove('visible');
+  interactionHint.setAttribute('aria-hidden', 'true');
+};
+
+const showInteractionHint = (view) => {
+  if (!interactionHint) return;
+
+  if (document.body.classList.contains('loading')) {
+    clearTimeout(interactionHintRetryTimer);
+    interactionHintRetryTimer = setTimeout(() => showInteractionHint(activeView), 350);
+    return;
+  }
+
+  const inputType = supportsTouch ? 'touch' : 'pointer';
+  const storageKey = `interactionHint:${view}:${inputType}`;
+  if (sessionStorage.getItem(storageKey) === 'shown') return;
+
+  const hintText = supportsTouch
+    ? (view === 'gallery'
+      ? 'DRAG TO EXPLORE · PINCH TO ZOOM · TAP TO OPEN'
+      : 'SWIPE TO BROWSE · TAP TO PREVIEW · TAP AGAIN TO OPEN')
+    : (view === 'gallery'
+      ? 'DRAG TO EXPLORE · HOVER TO PREVIEW · CLICK TO OPEN'
+      : 'SCROLL TO BROWSE · HOVER TO PREVIEW · CLICK TO OPEN');
+
+  interactionHint.dataset.input = inputType;
+  interactionHint.dataset.view = view;
+  interactionHint.querySelector('.hint-copy').textContent = hintText;
+  interactionHint.setAttribute('aria-hidden', 'false');
+  sessionStorage.setItem(storageKey, 'shown');
+
+  requestAnimationFrame(() => interactionHint.classList.add('visible'));
+  clearTimeout(interactionHintTimer);
+  interactionHintTimer = setTimeout(dismissInteractionHint, 4800);
+};
+
+window.addEventListener('pointerdown', dismissInteractionHint, { passive: true });
+window.addEventListener('wheel', dismissInteractionHint, { passive: true });
+window.addEventListener('keydown', dismissInteractionHint);
 
 const clearTouchHover = () => {
   if (lastTouchedCover) {
@@ -214,6 +261,8 @@ const setActiveView = (view) => {
   } else if (view === 'gallery') {
     requestAnimationFrame(centerGalleryCanvas);
   }
+
+  showInteractionHint(view);
 };
 
 setActiveView(activeView);

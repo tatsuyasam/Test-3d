@@ -54,11 +54,9 @@ const supportsTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 let touchStartY = null;
 let touchCurrentY = null;
 let touchMoved = false;
-let touchAccumulated = 0;
 let touchLastTime = 0;
 let touchVelocityY = 0;
 const touchThreshold = 8;
-const touchStep = 0.35; // Increased for better responsiveness
 let lastTouchedCover = null;
 let touchHoverTimeout = null;
 
@@ -239,24 +237,19 @@ window.addEventListener('touchmove', (event) => {
   const elapsed = Math.max(currentTime - touchLastTime, 1);
   touchVelocityY = touchVelocityY * 0.65 + (deltaY / elapsed) * 0.35;
   touchLastTime = currentTime;
-  if (Math.abs(deltaY) < 2) return;
+  if (Math.abs(deltaY) < 0.5) return;
   touchMoved = true;
   touchCurrentY = touchY;
-  touchAccumulated += deltaY;
-
-  // Prevent tiny micro-movements from triggering scroll changes
-  if (Math.abs(touchAccumulated) < touchThreshold) return;
 
   event.preventDefault();
   vinylCollection.classList.add('scrolling');
 
-  // Reverse the direction so swipe up moves collection forward
-  const direction = touchAccumulated > 0 ? -1 : 1;
-  activeIndex = clamp(activeIndex + direction * touchStep, 0, Math.max(getVisibleContainers().length - 1, 0));
+  activeIndex = clamp(
+    activeIndex - deltaY / itemSpacingY,
+    0,
+    Math.max(getVisibleContainers().length - 1, 0)
+  );
   updateCollectionTransform();
-
-  // Keep remaining motion for smoother interaction
-  touchAccumulated = touchAccumulated > 0 ? touchAccumulated - touchThreshold : touchAccumulated + touchThreshold;
 }, { passive: false });
 
 window.addEventListener('touchend', () => {
@@ -278,7 +271,6 @@ window.addEventListener('touchend', () => {
   touchStartY = null;
   touchCurrentY = null;
   touchMoved = false;
-  touchAccumulated = 0;
   touchVelocityY = 0;
 });
 
@@ -288,7 +280,6 @@ window.addEventListener('touchcancel', () => {
   touchStartY = null;
   touchCurrentY = null;
   touchMoved = false;
-  touchAccumulated = 0;
   touchVelocityY = 0;
 });
 

@@ -231,6 +231,27 @@ header {
     animation: hintWheel 1.15s ease-in-out infinite;
 }
 
+.interaction-hint[data-input="pointer"][data-view="gallery"] .hint-gesture {
+    width: 28px;
+    height: 24px;
+    flex-basis: 28px;
+    border: none;
+    border-radius: 0;
+}
+
+.interaction-hint[data-input="pointer"][data-view="gallery"] .hint-gesture::before {
+    content: '✊';
+    top: 0;
+    left: 2px;
+    width: auto;
+    height: auto;
+    background: none;
+    font-size: 17px;
+    line-height: 1;
+    transform: none;
+    animation: hintGrabDrag 1.25s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
 .interaction-hint[data-input="touch"] .hint-gesture::before,
 .interaction-hint[data-input="touch"] .hint-gesture::after {
     content: '';
@@ -264,6 +285,11 @@ header {
 @keyframes hintWheel {
     0%, 100% { opacity: 0.35; transform: translate(-50%, 0); }
     50% { opacity: 1; transform: translate(-50%, 7px); }
+}
+
+@keyframes hintGrabDrag {
+    0%, 100% { opacity: 0.45; transform: translateX(0) rotate(-8deg); }
+    50% { opacity: 1; transform: translateX(9px) rotate(5deg); }
 }
 
 @keyframes hintSwipe {

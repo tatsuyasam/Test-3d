@@ -611,6 +611,15 @@ const updateCursorTarget = (e) => {
 };
 
 vinylCovers.forEach((cover) => {
+  cover.addEventListener('click', (event) => {
+    if (supportsTouch || event.target.closest('.vinyl')) return;
+    const vinyl = cover.querySelector('.vinyl');
+    const targetUrl = vinyl?.dataset.projectUrl;
+    if (vinyl && targetUrl) {
+      animateVinylNavigation(vinyl, targetUrl);
+    }
+  });
+
   cover.addEventListener('mouseenter', (e) => {
     const projectName = cover.dataset.projectName;
     if (projectName) {
@@ -889,7 +898,6 @@ if (galleryTrack) {
     galleryTrack.addEventListener('pointerdown', (event) => {
       if (event.button !== 0) return;
       galleryPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      galleryTrack.setPointerCapture?.(event.pointerId);
       if (galleryPointers.size === 1) {
         beginGalleryDrag(event.clientX, event.clientY);
       } else if (galleryPointers.size === 2) {

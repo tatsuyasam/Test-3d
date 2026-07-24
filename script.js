@@ -47,7 +47,8 @@ calculateResponsiveSpacing();
 
 let activeIndex = 0;
 let activeFilter = 'all';
-let activeView = 'vinyl';
+const savedView = sessionStorage.getItem('portfolioView');
+let activeView = savedView === 'gallery' || savedView === 'vinyl' ? savedView : 'vinyl';
 const supportsTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 let touchStartY = null;
 let touchCurrentY = null;
@@ -78,6 +79,8 @@ const setTouchHover = (cover) => {
 
 const animateVinylNavigation = (vinyl, targetUrl) => {
   if (!vinyl || !targetUrl || isNavigating) return;
+
+  sessionStorage.setItem('portfolioView', activeView);
 
   if (prefersReducedMotion) {
     window.location.href = targetUrl;
@@ -183,6 +186,7 @@ updateCollectionTransform();
 
 const setActiveView = (view) => {
   activeView = view;
+  sessionStorage.setItem('portfolioView', activeView);
   galleryView?.classList.toggle('active', view === 'gallery');
   vinylCollection?.classList.toggle('active', view === 'vinyl');
 
@@ -717,15 +721,9 @@ galleryItems.forEach((item) => {
       return;
     }
     const targetUrl = item.dataset.projectUrl || 'project.html';
+    sessionStorage.setItem('portfolioView', 'gallery');
     window.location.href = targetUrl;
   });
-});
-
-history.pushState(null, null, location.href);
-
-// Desktop + basic back button handling
-window.addEventListener("popstate", () => {
-  history.pushState(null, null, location.href);
 });
 
 function resetPageState() {
@@ -754,6 +752,10 @@ window.addEventListener("pageshow", (event) => {
 
   if (isBackForward) {
     resetPageState();
+    const restoredView = sessionStorage.getItem('portfolioView');
+    if (restoredView === 'gallery' || restoredView === 'vinyl') {
+      setActiveView(restoredView);
+    }
   }
 });
 

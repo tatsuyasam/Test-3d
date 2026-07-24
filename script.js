@@ -5,6 +5,7 @@ const vinyls = Array.from(document.querySelectorAll('.vinyl'));
 const filterButtons = Array.from(document.querySelectorAll('.filter-button'));
 const filterDropdown = document.querySelector('.filter-dropdown');
 const filterToggle = document.querySelector('.filter-toggle');
+let filterCloseTimer = null;
 const viewButtons = Array.from(document.querySelectorAll('.view-button'));
 const galleryView = document.getElementById('gallery-view');
 const galleryTrack = document.getElementById('gallery-track');
@@ -204,6 +205,8 @@ const setActiveView = (view) => {
   if (view === 'vinyl') {
     setContainerPositions();
     updateCollectionTransform();
+  } else if (view === 'gallery') {
+    requestAnimationFrame(centerGalleryCanvas);
   }
 };
 
@@ -407,6 +410,7 @@ viewButtons.forEach((button) => {
 
 const closeFilterMenu = () => {
   if (!filterDropdown) return;
+  clearTimeout(filterCloseTimer);
   filterDropdown.classList.remove('open');
   if (filterToggle) {
     filterToggle.setAttribute('aria-expanded', 'false');
@@ -419,6 +423,17 @@ if (filterToggle) {
     if (!filterDropdown) return;
     const isOpen = filterDropdown.classList.toggle('open');
     filterToggle.setAttribute('aria-expanded', String(isOpen));
+  });
+}
+
+if (filterDropdown && window.matchMedia('(hover: hover)').matches) {
+  filterDropdown.addEventListener('mouseenter', () => {
+    clearTimeout(filterCloseTimer);
+  });
+
+  filterDropdown.addEventListener('mouseleave', () => {
+    clearTimeout(filterCloseTimer);
+    filterCloseTimer = setTimeout(closeFilterMenu, 150);
   });
 }
 
@@ -622,6 +637,15 @@ const galleryDragThreshold = 6;
 let canvasTranslateX = 0;
 let canvasTranslateY = 0;
 
+function centerGalleryCanvas() {
+  if (!galleryTrack || !galleryCanvas) return;
+  canvasTranslateX = (galleryTrack.clientWidth - galleryCanvas.offsetWidth) / 2;
+  canvasTranslateY = (galleryTrack.clientHeight - galleryCanvas.offsetHeight) / 2;
+  galleryCanvas.classList.add('springing');
+  galleryCanvas.style.transform = `translate(${canvasTranslateX}px, ${canvasTranslateY}px)`;
+  window.setTimeout(() => galleryCanvas.classList.remove('springing'), prefersReducedMotion ? 220 : 440);
+}
+
 if (galleryTrack) {
   const getGalleryBounds = () => {
     if (!galleryCanvas) {
@@ -634,12 +658,18 @@ if (galleryTrack) {
     const canvasHeight = galleryCanvas.offsetHeight;
     const centeredX = (trackWidth - canvasWidth) / 2;
     const centeredY = (trackHeight - canvasHeight) / 2;
+    const horizontalAllowance = clamp(trackWidth * 0.3, 180, 420);
+    const upwardAllowance = clamp(trackHeight * 0.32, 150, 320);
+    const baseMinX = canvasWidth > trackWidth ? trackWidth - canvasWidth : centeredX;
+    const baseMaxX = canvasWidth > trackWidth ? 0 : centeredX;
+    const baseMinY = canvasHeight > trackHeight ? trackHeight - canvasHeight : centeredY;
+    const baseMaxY = canvasHeight > trackHeight ? 0 : centeredY;
 
     return {
-      minX: canvasWidth > trackWidth ? trackWidth - canvasWidth : centeredX,
-      maxX: canvasWidth > trackWidth ? 0 : centeredX,
-      minY: canvasHeight > trackHeight ? trackHeight - canvasHeight : centeredY,
-      maxY: canvasHeight > trackHeight ? 0 : centeredY
+      minX: baseMinX - horizontalAllowance,
+      maxX: baseMaxX + horizontalAllowance,
+      minY: baseMinY - upwardAllowance,
+      maxY: baseMaxY
     };
   };
 

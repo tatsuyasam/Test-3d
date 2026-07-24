@@ -427,6 +427,7 @@ body.dark-grey-background::before {
     top: 0;
     width: 1800px;
     height: 1400px;
+    transform-origin: 0 0;
     will-change: transform;
     touch-action: none;
 }
@@ -1083,12 +1084,18 @@ body.touch-device .vinyl-cover.touch-hover::after {
     }
 
     .header-button {
-        flex: 1 1 30%;
+        flex: 1 1 0;
+        width: 0;
+        height: 46px;
         margin-right: 3px;
         margin-bottom: 4px;
         min-width: 0;
         font-size: 8px;
-        padding: 20px 10px 5px 8px;
+        padding: 8px;
+        align-items: flex-end;
+        justify-content: flex-start;
+        text-align: left;
+        line-height: 1.05;
     }
 
     .header-icon {

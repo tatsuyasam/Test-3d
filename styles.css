@@ -368,8 +368,8 @@ body::before {
     inset: 0;
     background: transparent;
     box-shadow: inset 0 0 0 0 rgba(0, 0, 0, 0);
-    backdrop-filter: blur(0);
-    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     opacity: 0;
     pointer-events: none;
     z-index: 5;
@@ -379,8 +379,6 @@ body::before {
 body.dark-grey-background::before {
     background: rgba(0, 0, 0, 0.1);
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
     opacity: 1;
 }
 
@@ -428,7 +426,6 @@ body.dark-grey-background::before {
     width: 1800px;
     height: 1400px;
     transform-origin: 0 0;
-    will-change: transform;
     touch-action: none;
 }
 
@@ -520,6 +517,8 @@ body.dark-grey-background::before {
     transform: translateY(8px);
     transition: opacity 0.22s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
     pointer-events: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
 }
 
 .gallery-item:hover .gallery-info,
@@ -554,7 +553,6 @@ body.dark-grey-background::before {
     left: 50%;
     display: none;
     pointer-events: auto;
-    will-change: transform;
     transform: translate(-50%, -50%);
 }
 
@@ -773,13 +771,13 @@ body.transitioning .vinyl:not(.fly-right) {
     color: #fff;
     text-align: left;
     background: rgba(18, 18, 18, 0.76);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+    text-shadow: none;
     opacity: 0;
     transform: translateX(0);
     transition: opacity 0.22s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     pointer-events: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
 }
 
 .vinyl-cover:hover .vinyl-info,
@@ -796,13 +794,13 @@ body.transitioning .vinyl:not(.fly-right) {
 
 .vinyl-info small {
     color: rgba(255, 255, 255, 0.72);
-    font-size: 8px;
+    font-size: 9px;
     letter-spacing: 0.08em;
 }
 
 .vinyl-info > span {
     color: rgba(255, 255, 255, 0.85);
-    font-size: 9px;
+    font-size: 10px;
     line-height: 1.35;
 }
 
@@ -1269,11 +1267,11 @@ body.touch-device .vinyl-cover.touch-hover::after {
     }
 
     .gallery-title {
-        font-size: 9px;
+        font-size: 11px;
     }
 
     .gallery-meta {
-        font-size: 7px;
+        font-size: 9px;
     }
 
     .gallery-description {

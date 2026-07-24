@@ -15,6 +15,10 @@ const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
 document.body.classList.add('loading');
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+const snapToDevicePixel = (value) => {
+  const pixelRatio = window.devicePixelRatio || 1;
+  return Math.round(value * pixelRatio) / pixelRatio;
+};
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Calculate responsive spacing based on viewport size and aspect ratio
@@ -179,7 +183,9 @@ const setContainerPositions = () => {
 };
 
 const updateCollectionTransform = () => {
-  vinylCollection.style.transform = `translate(-50%, -50%) translate(${activeIndex * itemSpacingX}px, ${-activeIndex * itemSpacingY}px)`;
+  const x = snapToDevicePixel(activeIndex * itemSpacingX);
+  const y = snapToDevicePixel(-activeIndex * itemSpacingY);
+  vinylCollection.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
 };
 
 setContainerPositions();
@@ -663,8 +669,8 @@ let galleryRenderFrame = null;
 
 function centerGalleryCanvas() {
   if (!galleryTrack || !galleryCanvas) return;
-  canvasTranslateX = (galleryTrack.clientWidth - galleryCanvas.offsetWidth * canvasScale) / 2;
-  canvasTranslateY = (galleryTrack.clientHeight - galleryCanvas.offsetHeight * canvasScale) / 2;
+  canvasTranslateX = snapToDevicePixel((galleryTrack.clientWidth - galleryCanvas.offsetWidth * canvasScale) / 2);
+  canvasTranslateY = snapToDevicePixel((galleryTrack.clientHeight - galleryCanvas.offsetHeight * canvasScale) / 2);
   galleryCanvas.classList.add('springing');
   galleryCanvas.style.transform = `translate(${canvasTranslateX}px, ${canvasTranslateY}px) scale(${canvasScale})`;
   window.setTimeout(() => galleryCanvas.classList.remove('springing'), prefersReducedMotion ? 220 : 440);
@@ -722,7 +728,9 @@ if (galleryTrack) {
     if (galleryCanvas) {
       if (galleryRenderFrame !== null) return;
       galleryRenderFrame = requestAnimationFrame(() => {
-        galleryCanvas.style.transform = `translate3d(${canvasTranslateX}px, ${canvasTranslateY}px, 0) scale(${canvasScale})`;
+        const renderedX = snapToDevicePixel(canvasTranslateX);
+        const renderedY = snapToDevicePixel(canvasTranslateY);
+        galleryCanvas.style.transform = `translate(${renderedX}px, ${renderedY}px) scale(${canvasScale})`;
         galleryRenderFrame = null;
       });
     } else {

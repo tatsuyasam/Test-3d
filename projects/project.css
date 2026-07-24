@@ -809,8 +809,8 @@ body.lightbox-open {
 
 @media (max-width: 960px) {
   .project-vinyl {
-    --vinyl-size: 180px;
-    right: 14px;
+    --vinyl-size: 100px;
+    right: 18px;
     top: 36%;
   }
 
@@ -845,35 +845,7 @@ body.lightbox-open {
   .project-nav-vinyl { display: none; }
 }
 
-@media (max-width: 960px) {
-  .project-vinyl {
-    --vinyl-size: 100px;
-    right: 18px;
-  }
-}
-
-@media (max-width: 640px) {
-  /* hide on small screens to avoid occluding content */
-  .project-vinyl { display: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.001ms !important;
-  }
-
-  .project-loader-vinyl,
-  .project-vinyl {
-    animation: none !important;
-    transform: translateY(-50%) translateX(40%) !important;
-  }
-}
-
+/* Project-page interaction guidance */
 .project-interaction-hint {
   position: fixed;
   left: 50%;
@@ -929,6 +901,21 @@ body.lightbox-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .project-loader-vinyl,
+  .project-vinyl {
+    animation: none !important;
+    transform: translateY(-50%) translateX(40%) !important;
+  }
+
   .project-interaction-hint {
     transition-duration: 0.2s !important;
   }

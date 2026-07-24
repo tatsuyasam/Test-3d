@@ -1,4 +1,5 @@
 (function(){
+  // Project registry and masonry layout
   const PROJECTS = [
     { id: '01', url: '01-Grasshopper.html', label: 'Computational Design' },
     { id: '02', url: '02-Stone-Veil.html', label: 'Stone Veil' },
@@ -70,6 +71,7 @@
     await new Promise((resolve) => requestAnimationFrame(() => resolve()));
   }
 
+  // Page entrance loader
   function getProjectVinylSource() {
     const match = location.pathname.match(/(\d{2})/);
     if (match) {
@@ -188,6 +190,7 @@
   });
 
   /* Inject a spinning vinyl on project pages using the hero image */
+  // Previous/next project vinyl navigation
   function initVinyl(){
     if(!document.querySelector('.project-page')) return;
     const heroImg = document.querySelector('.hero-image img');
@@ -305,6 +308,7 @@
     requestAnimationFrame(updateRotation);
   }
 
+  // Accessible image lightbox
   function initProjectLightbox() {
     if (document.querySelector('.project-lightbox')) return;
 
@@ -396,6 +400,7 @@
     });
   }
 
+  // One-time interaction guidance
   function showProjectInteractionHint() {
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const storageKey = `projectInteractionHint:${location.pathname}:${isTouch ? 'touch' : 'pointer'}`;

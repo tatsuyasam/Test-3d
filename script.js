@@ -1,3 +1,53 @@
+// ============================================================================
+// DOM references and shared utilities
+// ============================================================================
+
+const projectDataElement = document.getElementById('project-data');
+const projectData = projectDataElement
+  ? JSON.parse(projectDataElement.textContent)
+  : [];
+
+const renderProjectViews = (projects) => {
+  const galleryCanvasElement = document.getElementById('gallery-canvas');
+  const vinylCollectionElement = document.getElementById('vinyl-collection');
+  if (!galleryCanvasElement || !vinylCollectionElement) return;
+
+  galleryCanvasElement.innerHTML = projects.map((project) => `
+    <a
+      class="gallery-item"
+      href="${project.url}"
+      data-categories="${project.categories}"
+      style="left: ${project.position.left}; top: ${project.position.top};"
+    >
+      <img class="gallery-vinyl" src="${project.vinyl}" alt="" aria-hidden="true">
+      <img class="gallery-image" src="${project.cover}" alt="${project.alt}">
+      <span class="gallery-info">
+        <span class="gallery-title">${project.title}</span>
+        <span class="gallery-meta">${project.year} · ${project.type}</span>
+        <span class="gallery-description">${project.description}</span>
+      </span>
+    </a>
+  `).join('');
+
+  vinylCollectionElement.innerHTML = projects.map((project) => `
+    <div class="vinyl-container" data-categories="${project.categories}">
+      <div class="vinyl-cover" data-project-name="${project.title}">
+        <img class="cover-image" src="${project.cover}" alt="${project.alt}">
+        <div class="vinyl" data-project-url="${project.url}">
+          <img class="vinyl-image" src="${project.vinyl}" alt="${project.title} vinyl record">
+        </div>
+        <span class="vinyl-info">
+          <strong>${project.title}</strong>
+          <small>${project.year} · ${project.type}</small>
+          <span>${project.description}</span>
+        </span>
+      </div>
+    </div>
+  `).join('');
+};
+
+renderProjectViews(projectData);
+
 const vinylCollection = document.querySelector('.vinyl-collection');
 const vinylContainers = Array.from(document.querySelectorAll('.vinyl-container'));
 const vinylCovers = Array.from(document.querySelectorAll('.vinyl-cover'));
@@ -22,7 +72,10 @@ const snapToDevicePixel = (value) => {
 };
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Calculate responsive spacing based on viewport size and aspect ratio
+// ============================================================================
+// Shared portfolio state and responsive vinyl spacing
+// ============================================================================
+
 let itemSpacingX = 320;
 let itemSpacingY = 170;
 
@@ -74,6 +127,10 @@ const dismissInteractionHint = () => {
   interactionHint.classList.remove('visible');
   interactionHint.setAttribute('aria-hidden', 'true');
 };
+
+// ============================================================================
+// Contextual interaction hints
+// ============================================================================
 
 const showInteractionHint = (view) => {
   if (!interactionHint) return;
@@ -189,6 +246,10 @@ const animateVinylNavigation = (vinyl, targetUrl) => {
     });
   }, { once: true });
 };
+
+// ============================================================================
+// Project filtering and view switching
+// ============================================================================
 
 if (supportsTouch) {
   document.body.classList.add('touch-device');
@@ -338,7 +399,10 @@ window.addEventListener('touchcancel', () => {
   touchVelocityY = 0;
 });
 
-// Auto-scroll animation on page load
+// ============================================================================
+// Vinyl touch, wheel, and entrance motion
+// ============================================================================
+
 let autoScrollAnimationId;
 let autoScrollProgress = 0;
 const autoScrollVinyls = () => {
@@ -376,17 +440,12 @@ const autoScrollVinyls = () => {
   autoScrollAnimationId = requestAnimationFrame(animate);
 };
 
-// Start auto-scroll immediately with entrance animation
-// autoScrollVinyls();
-
-// Handle window resize to recalculate spacing
 window.addEventListener('resize', () => {
   calculateResponsiveSpacing();
   setContainerPositions();
   updateCollectionTransform();
 });
 
-let isScrolling = false;
 const scrollStep = 0.3;
 
 window.addEventListener('wheel', (event) => {
@@ -416,11 +475,14 @@ const aboutMeText = document.getElementById('about-me-text');
 const award1Button = document.querySelector('.award1-button');
 const award2Button = document.querySelector('.award2-button');
 const contactOptions = document.getElementById('contact-options');
-const emailbutton = document.querySelector('.email-button');
+const emailButton = document.querySelector('.email-button');
 const linkedinButton = document.querySelector('.linkedin-button');
 const instaButton = document.querySelector('.insta-button');
 
-// Set the "SAM'S PORTFOLIO" button as initially active
+// ============================================================================
+// Header, About, Contact, and external actions
+// ============================================================================
+
 portfolioButton.classList.add('active')
 
 
@@ -557,15 +619,15 @@ const copyToClipboard = async (text) => {
   }
 };
 
-if (emailbutton) {
-  emailbutton.addEventListener('click', async () => {
+if (emailButton) {
+  emailButton.addEventListener('click', async () => {
     const success = await copyToClipboard('samtzk2006@gmail.com');
     if (!success) return;
-    const originalText = emailbutton.textContent;
-    emailbutton.textContent = 'Email Copied!';
-    clearTimeout(emailbutton._timeout);
-    emailbutton._timeout = setTimeout(() => {
-      emailbutton.textContent = originalText;
+    const originalText = emailButton.textContent;
+    emailButton.textContent = 'Email Copied!';
+    clearTimeout(emailButton._timeout);
+    emailButton._timeout = setTimeout(() => {
+      emailButton.textContent = originalText;
     }, 2000);
   });
 }
@@ -585,6 +647,10 @@ if (instaButton) {
 
 
 let isNavigating = false;
+
+// ============================================================================
+// Vinyl hover, touch preview, and project navigation
+// ============================================================================
 
 const customCursorText = document.getElementById('custom-cursor-text');
 let cursorTargetX = 0;
@@ -710,8 +776,6 @@ vinyls.forEach((vinyl) => {
 let isDraggingGallery = false;
 let galleryDragStartX = 0;
 let galleryDragStartY = 0;
-let galleryDragOriginScrollLeft = 0;
-let galleryDragOriginScrollTop = 0;
 let galleryDragOriginTranslateX = 0;
 let galleryDragOriginTranslateY = 0;
 let galleryPointerActive = false;
@@ -719,7 +783,10 @@ let suppressGalleryClick = false;
 let gallerySpringTimer = null;
 const galleryDragThreshold = 6;
 
-// current transform position (we move the canvas opposite the pointer)
+// ============================================================================
+// Draggable and pinch-zoomable 2D gallery
+// ============================================================================
+
 let canvasTranslateX = 0;
 let canvasTranslateY = 0;
 let canvasScale = 1;
@@ -828,8 +895,6 @@ if (galleryTrack) {
     suppressGalleryClick = false;
     galleryDragStartX = clientX;
     galleryDragStartY = clientY;
-    galleryDragOriginScrollLeft = galleryTrack.scrollLeft;
-    galleryDragOriginScrollTop = galleryTrack.scrollTop;
     galleryDragOriginTranslateX = canvasTranslateX;
     galleryDragOriginTranslateY = canvasTranslateY;
     refreshGalleryMetrics();
@@ -993,6 +1058,10 @@ galleryItems.forEach((item) => {
   });
 });
 
+// ============================================================================
+// Back-navigation recovery and first-visit loader
+// ============================================================================
+
 function resetPageState() {
   document.body.classList.remove('transitioning', 'dark-grey-background');
 
@@ -1011,7 +1080,6 @@ function resetPageState() {
   document.body.offsetHeight;
 }
 
-// Mobile + Safari + GitHub Pages fix
 window.addEventListener("pageshow", (event) => {
   const isBackForward =
     event.persisted ||
@@ -1046,7 +1114,6 @@ const isReload = navEntry?.type === "reload";
 const isBackForward = navEntry?.type === "back_forward";
 const hasVisited = localStorage.getItem('hasVisited') === 'true';
 
-// ❌ SKIP LOADER CONDITIONS
 const skipLoader =
   hasVisited || isReload || isBackForward || isReturningFromProject;
 

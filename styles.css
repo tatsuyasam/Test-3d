@@ -10,6 +10,10 @@
     --radius-pill: 999px;
 }
 
+/* ==========================================================================
+   Document and loading state
+   ========================================================================== */
+
 html,
 
 body {
@@ -91,6 +95,10 @@ header {
     pointer-events: none;
 }
 
+/* ==========================================================================
+   Header navigation
+   ========================================================================== */
+
 .header-button {
     background-color: #272727;
     color: #a8a8a8;
@@ -167,6 +175,10 @@ header {
     max-width: min(720px, calc(100vw - 24px));
     pointer-events: auto;
 }
+
+/* ==========================================================================
+   Interaction guidance
+   ========================================================================== */
 
 .interaction-hint {
     position: fixed;
@@ -339,6 +351,10 @@ header {
     align-items: center;
 }
 
+/* ==========================================================================
+   View switcher and project filters
+   ========================================================================== */
+
 .filter-dropdown {
     position: fixed;
     right: 16px;
@@ -406,9 +422,21 @@ header {
     width: 100%;
     text-align: right;
     min-width: 112px;
+    padding: 8px 12px;
+    border: 1px solid #a8a8a8;
+    border-radius: var(--radius-pill);
+    color: #a8a8a8;
+    background-color: #272727;
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
     transform: translateY(var(--filter-travel, 44px));
     opacity: 0;
     transition:
+        border-color 0.2s ease,
+        color 0.2s ease,
+        background-color 0.2s ease,
         transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
         opacity 0.18s ease;
 }
@@ -489,24 +517,6 @@ header {
     color: #fff;
 }
 
-.filter-button {
-    background-color: #272727;
-    color: #a8a8a8;
-    border: 1px solid #a8a8a8;
-    border-radius: var(--radius-pill);
-    padding: 8px 12px;
-    font: inherit;
-    font-size: 10px;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    transition:
-        border-color 0.2s ease,
-        color 0.2s ease,
-        background-color 0.2s ease,
-        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.18s ease;
-}
-
 .filter-button:hover,
 .filter-button.active {
     border-color: #fff;
@@ -518,6 +528,10 @@ body.dark-grey-background .project-filter {
     opacity: 0;
     pointer-events: none;
 }
+
+/* ==========================================================================
+   Main project stage and modal background state
+   ========================================================================== */
 
 body.dark-grey-background {
     position: relative;
@@ -561,6 +575,10 @@ body.dark-grey-background::before {
     display: none;
     pointer-events: auto;
 }
+
+/* ==========================================================================
+   Draggable 2D gallery
+   ========================================================================== */
 
 .gallery-view.active {
     display: block;
@@ -721,6 +739,10 @@ body.dark-grey-background::before {
     pointer-events: auto;
     transform: translate(-50%, -50%);
 }
+
+/* ==========================================================================
+   Vinyl collection
+   ========================================================================== */
 
 .vinyl-collection.active {
     display: block;
@@ -1069,6 +1091,10 @@ body.touch-device .vinyl-cover.touch-hover::after {
     z-index: 10;
 }
 
+/* ==========================================================================
+   About and contact panels
+   ========================================================================== */
+
 .about-me-text {
     padding-left: 11px;
     position: absolute;
@@ -1209,6 +1235,10 @@ body.touch-device .vinyl-cover.touch-hover::after {
     border-color: #fff;
     color: #fff;
 }
+
+/* ==========================================================================
+   Responsive layout
+   ========================================================================== */
 
 @media (max-width: 900px) {
     .header-button {
@@ -1542,6 +1572,10 @@ body.touch-device .vinyl-cover.touch-hover::after {
         grid-template-columns: minmax(0, 80px) minmax(0, 300px);
     }
 }
+
+/* ==========================================================================
+   Motion preferences
+   ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
     html {

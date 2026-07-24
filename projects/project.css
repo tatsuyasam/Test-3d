@@ -638,10 +638,10 @@ body.lightbox-open {
   height: 40px;
   border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: 6px;
-  background: rgba(20, 20, 20, 0.82);
+  background: rgba(0, 0, 0, 0.82);
   color: rgba(255, 255, 255, 0.9);
   font: inherit;
-  font-size: 16px;
+  font-size: 20px;
   cursor: pointer;
 }
 
@@ -663,9 +663,7 @@ body.lightbox-open {
 }
 
 .lightbox-btn:hover {
-  border-color: rgba(255, 255, 255, 0.55);
-  background: rgba(42, 42, 42, 0.94);
-  color: #fff;
+  font-size: 28px;
 }
 
 .project-metadata {

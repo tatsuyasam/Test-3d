@@ -348,17 +348,38 @@ const resetView = () => {
     if (textBox) textBox.style.display = 'none';
     if (aboutMeText) aboutMeText.classList.remove('visible');
     if (contactOptions) contactOptions.style.display = 'none';
-    if (headerIcon) headerIcon.classList.remove('animate');
+    if (headerIcon) {
+      headerIcon.classList.remove('animate');
+      headerIcon.setAttribute('aria-pressed', 'false');
+    }
 };
 const clearActiveButtons = () => {
     aboutMeButton.classList.remove('active');
     portfolioButton.classList.remove('active');
     contactButton.classList.remove('active');
 };
+
+const toggleHeaderMark = () => {
+    if (!headerIcon) return;
+    const isExpanded = headerIcon.classList.toggle('animate');
+    headerIcon.setAttribute('aria-pressed', String(isExpanded));
+};
+
+if (headerIcon) {
+    headerIcon.setAttribute('aria-pressed', 'false');
+    headerIcon.addEventListener('click', toggleHeaderMark);
+    headerIcon.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        toggleHeaderMark();
+    });
+}
+
 aboutMeButton.addEventListener('click', () => {
     clearActiveButtons();
     aboutMeButton.classList.add('active');
     if (headerIcon) headerIcon.classList.add('animate');
+    if (headerIcon) headerIcon.setAttribute('aria-pressed', 'true');
     document.body.classList.add('dark-grey-background');
     if (textBox) textBox.style.display = 'block';
     if (aboutMeText) aboutMeText.classList.add('visible');
@@ -593,6 +614,8 @@ let galleryDragOriginScrollTop = 0;
 let galleryDragOriginTranslateX = 0;
 let galleryDragOriginTranslateY = 0;
 let galleryPointerActive = false;
+let suppressGalleryClick = false;
+let gallerySpringTimer = null;
 const galleryDragThreshold = 6;
 
 // current transform position (we move the canvas opposite the pointer)
@@ -600,15 +623,72 @@ let canvasTranslateX = 0;
 let canvasTranslateY = 0;
 
 if (galleryTrack) {
+  const getGalleryBounds = () => {
+    if (!galleryCanvas) {
+      return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+    }
+
+    const trackWidth = galleryTrack.clientWidth;
+    const trackHeight = galleryTrack.clientHeight;
+    const canvasWidth = galleryCanvas.offsetWidth;
+    const canvasHeight = galleryCanvas.offsetHeight;
+    const centeredX = (trackWidth - canvasWidth) / 2;
+    const centeredY = (trackHeight - canvasHeight) / 2;
+
+    return {
+      minX: canvasWidth > trackWidth ? trackWidth - canvasWidth : centeredX,
+      maxX: canvasWidth > trackWidth ? 0 : centeredX,
+      minY: canvasHeight > trackHeight ? trackHeight - canvasHeight : centeredY,
+      maxY: canvasHeight > trackHeight ? 0 : centeredY
+    };
+  };
+
+  const applyEdgeResistance = (value, min, max) => {
+    if (value < min) return min + (value - min) * 0.18;
+    if (value > max) return max + (value - max) * 0.18;
+    return value;
+  };
+
+  const applyCanvasTransform = (x, y) => {
+    canvasTranslateX = x;
+    canvasTranslateY = y;
+    if (galleryCanvas) {
+      galleryCanvas.style.transform = `translate(${canvasTranslateX}px, ${canvasTranslateY}px)`;
+    } else {
+      galleryTrack.scrollLeft = -canvasTranslateX;
+      galleryTrack.scrollTop = -canvasTranslateY;
+    }
+  };
+
+  const springGalleryIntoBounds = () => {
+    const bounds = getGalleryBounds();
+    const targetX = clamp(canvasTranslateX, bounds.minX, bounds.maxX);
+    const targetY = clamp(canvasTranslateY, bounds.minY, bounds.maxY);
+    if (targetX === canvasTranslateX && targetY === canvasTranslateY) return;
+
+    if (galleryCanvas) {
+      galleryCanvas.classList.add('springing');
+      clearTimeout(gallerySpringTimer);
+      gallerySpringTimer = setTimeout(() => {
+        galleryCanvas.classList.remove('springing');
+      }, prefersReducedMotion ? 220 : 440);
+    }
+    applyCanvasTransform(targetX, targetY);
+  };
+
   const finishGalleryDrag = () => {
     galleryTrack.classList.remove('dragging');
     galleryPointerActive = false;
     isDraggingGallery = false;
+    springGalleryIntoBounds();
   };
 
   const beginGalleryDrag = (clientX, clientY) => {
+    if (galleryCanvas) galleryCanvas.classList.remove('springing');
+    clearTimeout(gallerySpringTimer);
     galleryPointerActive = true;
     isDraggingGallery = false;
+    suppressGalleryClick = false;
     galleryDragStartX = clientX;
     galleryDragStartY = clientY;
     galleryDragOriginScrollLeft = galleryTrack.scrollLeft;
@@ -618,18 +698,6 @@ if (galleryTrack) {
     galleryTrack.classList.add('dragging');
   };
 
-  const applyCanvasTransform = (x, y) => {
-    canvasTranslateX = x;
-    canvasTranslateY = y;
-    if (galleryCanvas) {
-      galleryCanvas.style.transform = `translate(${canvasTranslateX}px, ${canvasTranslateY}px)`;
-    } else {
-      // fallback to scroll when no canvas present
-      galleryTrack.scrollLeft = -canvasTranslateX;
-      galleryTrack.scrollTop = -canvasTranslateY;
-    }
-  };
-
   const updateGalleryDrag = (clientX, clientY, event) => {
     if (!galleryPointerActive) return;
     const deltaX = clientX - galleryDragStartX;
@@ -637,13 +705,17 @@ if (galleryTrack) {
 
     if (!isDraggingGallery && (Math.abs(deltaX) > galleryDragThreshold || Math.abs(deltaY) > galleryDragThreshold)) {
       isDraggingGallery = true;
+      suppressGalleryClick = true;
     }
 
     if (isDraggingGallery) {
-      // move canvas opposite to pointer movement to mimic viewport panning
       const nextX = galleryDragOriginTranslateX + deltaX;
       const nextY = galleryDragOriginTranslateY + deltaY;
-      applyCanvasTransform(nextX, nextY);
+      const bounds = getGalleryBounds();
+      applyCanvasTransform(
+        applyEdgeResistance(nextX, bounds.minX, bounds.maxX),
+        applyEdgeResistance(nextY, bounds.minY, bounds.maxY)
+      );
       event.preventDefault();
     }
   };
@@ -651,19 +723,16 @@ if (galleryTrack) {
   galleryTrack.addEventListener('pointerdown', (event) => {
     if (event.button !== 0) return;
     beginGalleryDrag(event.clientX, event.clientY);
-    event.preventDefault();
   });
 
   galleryTrack.addEventListener('mousedown', (event) => {
     if (event.button !== 0) return;
     beginGalleryDrag(event.clientX, event.clientY);
-    event.preventDefault();
   });
 
   galleryTrack.addEventListener('touchstart', (event) => {
     if (event.touches.length !== 1) return;
     beginGalleryDrag(event.touches[0].clientX, event.touches[0].clientY);
-    event.preventDefault();
   }, { passive: false });
 
   // prefer pointer events when available
@@ -711,18 +780,18 @@ if (galleryTrack) {
     if (!galleryPointerActive) return;
     endGalleryDrag();
   }, { passive: true });
+
+  window.addEventListener('resize', springGalleryIntoBounds);
 }
 
 galleryItems.forEach((item) => {
   item.addEventListener('click', (event) => {
-    if (isDraggingGallery) {
-      isDraggingGallery = false;
+    if (suppressGalleryClick) {
+      suppressGalleryClick = false;
       event.preventDefault();
       return;
     }
-    const targetUrl = item.dataset.projectUrl || 'project.html';
     sessionStorage.setItem('portfolioView', 'gallery');
-    window.location.href = targetUrl;
   });
 });
 
@@ -777,10 +846,11 @@ const navEntry = performance.getEntriesByType("navigation")[0];
 
 const isReload = navEntry?.type === "reload";
 const isBackForward = navEntry?.type === "back_forward";
+const hasVisited = localStorage.getItem('hasVisited') === 'true';
 
 // ❌ SKIP LOADER CONDITIONS
 const skipLoader =
-  isReload || isBackForward || isReturningFromProject;
+  hasVisited || isReload || isBackForward || isReturningFromProject;
 
 const loader = document.getElementById('loader');
 const percentText = document.getElementById('loader-percent');
@@ -791,6 +861,7 @@ if (skipLoader) {
   autoScrollVinyls();
 } else {
 
+  localStorage.setItem('hasVisited', 'true');
   document.body.classList.add('loading');
 
   window.addEventListener('load', () => {

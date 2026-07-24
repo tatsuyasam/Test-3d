@@ -45,7 +45,8 @@
         <button class="header-button" id="about-me-button">ABOUT ME</button>
         <button class="header-button" id="contact-button">CONTACT</button>
 <!--    <button class="header-button" id="XXX-button">XXX</button>      --> 
-        <img src="header-icon.png" alt="Icon" class="header-icon" id="header-icon">
+        <img src="header-icon.png" alt="Open portfolio mark" class="header-icon" id="header-icon"
+             role="button" tabindex="0" aria-label="Open portfolio mark">
     </header>
 
 <!--  Main content of the website  -->
@@ -75,30 +76,60 @@
     <section class="gallery-view" id="gallery-view" aria-label="Project gallery">
       <div class="gallery-track" id="gallery-track">
         <div class="gallery-canvas" id="gallery-canvas">
-        <article class="gallery-item" data-categories="computational" data-project-url="projects/01-Grasshopper.html" style="left: 6%; top: 10%;">
+        <a class="gallery-item" href="projects/01-Grasshopper.html" data-categories="computational" data-project-url="projects/01-Grasshopper.html" style="left: 6%; top: 10%;">
           <img class="gallery-vinyl" src="01_Vinyl.png" alt="" aria-hidden="true" />
           <img class="gallery-image" src="01_GRASSHOPPER.png" alt="Grasshopper project preview" />
-        </article>
-        <article class="gallery-item" data-categories="architecture competition public" data-project-url="projects/02-Stone-Veil.html" style="left: 34%; top: 18%;">
+          <span class="gallery-info">
+            <span class="gallery-title">COMPUTATIONAL DESIGN</span>
+            <span class="gallery-meta">2023–2026 · COMPUTATIONAL</span>
+            <span class="gallery-description">Parametric workflows for complex forms, adaptive systems and design automation.</span>
+          </span>
+        </a>
+        <a class="gallery-item" href="projects/02-Stone-Veil.html" data-categories="architecture competition public" data-project-url="projects/02-Stone-Veil.html" style="left: 34%; top: 18%;">
           <img class="gallery-vinyl" src="02_Vinyl.png" alt="" aria-hidden="true" />
           <img class="gallery-image" src="02_STONE VEIL.png" alt="Stone Veil project preview" />
-        </article>
-        <article class="gallery-item" data-categories="architecture community" data-project-url="projects/03-Adda.html" style="left: 62%; top: 10%;">
+          <span class="gallery-info">
+            <span class="gallery-title">STONE VEIL</span>
+            <span class="gallery-meta">2025 · PUBLIC ARCHITECTURE</span>
+            <span class="gallery-description">A civic rest point shaped as a quiet interlude within Singapore’s park network.</span>
+          </span>
+        </a>
+        <a class="gallery-item" href="projects/03-Adda.html" data-categories="architecture community" data-project-url="projects/03-Adda.html" style="left: 62%; top: 10%;">
           <img class="gallery-vinyl" src="03_Vinyl.png" alt="" aria-hidden="true" />
           <img class="gallery-image" src="03_ADDA.png" alt="Adda project preview" />
-        </article>
-        <article class="gallery-item" data-categories="architecture competition public" data-project-url="projects/04-Kelip.html" style="left: 16%; top: 48%;">
+          <span class="gallery-info">
+            <span class="gallery-title">ADDA</span>
+            <span class="gallery-meta">2024 · COMMUNITY CENTRE</span>
+            <span class="gallery-description">A welcoming place for vulnerable communities to find connection, support and voice.</span>
+          </span>
+        </a>
+        <a class="gallery-item" href="projects/04-Kelip.html" data-categories="architecture competition public" data-project-url="projects/04-Kelip.html" style="left: 16%; top: 48%;">
           <img class="gallery-vinyl" src="04_Vinyl.png" alt="" aria-hidden="true" />
           <img class="gallery-image" src="04_KELIP.png" alt="Kelip project preview" />
-        </article>
-        <article class="gallery-item" data-categories="architecture cultural community" data-project-url="projects/05-Aliwal-Music-House.html" style="left: 46%; top: 54%;">
+          <span class="gallery-info">
+            <span class="gallery-title">KELIP</span>
+            <span class="gallery-meta">2025 · PUBLIC ARCHITECTURE</span>
+            <span class="gallery-description">Intergenerational play reconnecting people with one another, time and nature.</span>
+          </span>
+        </a>
+        <a class="gallery-item" href="projects/05-Aliwal-Music-House.html" data-categories="architecture cultural community" data-project-url="projects/05-Aliwal-Music-House.html" style="left: 46%; top: 54%;">
           <img class="gallery-vinyl" src="05_Vinyl.png" alt="" aria-hidden="true" />
           <img class="gallery-image" src="05_ALIWAL MUSIC HOUSE.png" alt="Aliwal Music House project preview" />
-        </article>
-        <article class="gallery-item" data-categories="architecture cultural hospitality" data-project-url="projects/06-Tobara.html" style="left: 74%; top: 46%;">
+          <span class="gallery-info">
+            <span class="gallery-title">ALIWAL MUSIC HOUSE</span>
+            <span class="gallery-meta">2025 · CULTURAL CENTRE</span>
+            <span class="gallery-description">A community hub lowering the barriers to making and experiencing music.</span>
+          </span>
+        </a>
+        <a class="gallery-item" href="projects/06-Tobara.html" data-categories="architecture cultural hospitality" data-project-url="projects/06-Tobara.html" style="left: 74%; top: 46%;">
           <img class="gallery-vinyl" src="06_Vinyl.png" alt="" aria-hidden="true" />
           <img class="gallery-image" src="06_TOBARA.png" alt="Tobara project preview" />
-        </article>
+          <span class="gallery-info">
+            <span class="gallery-title">TOBARA</span>
+            <span class="gallery-meta">2024 · HOSPITALITY RESORT</span>
+            <span class="gallery-description">Cultural exchange supporting the revival of Batak craft traditions.</span>
+          </span>
+        </a>
 <!--  
         <article class="gallery-item" data-categories="architecture cultural hospitality" data-project-url="projects/06-Tobara.html" style="left: xx%; top: xx%;">
           <img class="gallery-image" src="07_xxx.png" alt="Tobara project preview" />
@@ -115,6 +146,7 @@
          <div class="vinyl" data-project-url="projects/01-Grasshopper.html">
              <img class="vinyl-image" src="01_Vinyl.png" alt="Vinyl record 1" />
          </div>
+         <span class="vinyl-info"><strong>COMPUTATIONAL DESIGN</strong><small>2023–2026 · COMPUTATIONAL</small><span>Parametric workflows and design automation.</span></span>
        </div>
      </div>
      <div class="vinyl-container" data-categories="architecture competition public">
@@ -123,6 +155,7 @@
          <div class="vinyl" data-project-url="projects/02-Stone-Veil.html">
              <img class="vinyl-image" src="02_Vinyl.png" alt="Vinyl record 2" />
          </div>
+         <span class="vinyl-info"><strong>STONE VEIL</strong><small>2025 · PUBLIC ARCHITECTURE</small><span>A quiet civic rest point within the landscape.</span></span>
        </div>
      </div>
      <div class="vinyl-container" data-categories="architecture community">
@@ -131,6 +164,7 @@
          <div class="vinyl" data-project-url="projects/03-Adda.html">
              <img class="vinyl-image" src="03_Vinyl.png" alt="Vinyl record 3 " />
          </div>
+         <span class="vinyl-info"><strong>ADDA</strong><small>2024 · COMMUNITY CENTRE</small><span>A place for connection, support and voice.</span></span>
        </div>
      </div>
      <div class="vinyl-container" data-categories="architecture competition public">
@@ -139,6 +173,7 @@
          <div class="vinyl" data-project-url="projects/04-Kelip.html">
              <img class="vinyl-image" src="04_Vinyl.png" alt="Vinyl record 4" />
          </div>
+         <span class="vinyl-info"><strong>KELIP</strong><small>2025 · PUBLIC ARCHITECTURE</small><span>Intergenerational play, time and nature.</span></span>
        </div>
      </div>
      <div class="vinyl-container" data-categories="architecture cultural community">
@@ -147,6 +182,7 @@
          <div class="vinyl" data-project-url="projects/05-Aliwal-Music-House.html">
              <img class="vinyl-image" src="05_Vinyl.png" alt="Vinyl record 5" />
          </div>
+         <span class="vinyl-info"><strong>ALIWAL MUSIC HOUSE</strong><small>2025 · CULTURAL CENTRE</small><span>A community hub for making music together.</span></span>
        </div>
      </div>
          <div class="vinyl-container" data-categories="architecture cultural hospitality">
@@ -155,6 +191,7 @@
          <div class="vinyl" data-project-url="projects/06-Tobara.html">
              <img class="vinyl-image" src="06_Vinyl.png" alt="Vinyl record 6" />
          </div>
+         <span class="vinyl-info"><strong>TOBARA</strong><small>2024 · HOSPITALITY RESORT</small><span>Cultural exchange sustaining Batak craft.</span></span>
        </div>
      </div>
 <!--

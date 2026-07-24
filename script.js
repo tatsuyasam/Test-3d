@@ -38,7 +38,7 @@ const calculateResponsiveSpacing = () => {
   }
   // On desktop (>= 900px), use default spacing
   else {
-    itemSpacingX = 320;
+    itemSpacingX = 290;
     itemSpacingY = 170;
   }
 };
@@ -415,7 +415,6 @@ filterButtons.forEach((button) => {
     activeIndex = 0;
     setContainerPositions();
     updateCollectionTransform();
-    closeFilterMenu();
   });
   button.setAttribute('aria-pressed', button.classList.contains('active') ? 'true' : 'false');
 });
